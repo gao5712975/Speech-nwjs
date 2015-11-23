@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>electron</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="./resources/static/css/bootstrap.min.css">
+    <!-- 可选的Bootstrap主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="./resources/static/css/bootstrap-theme.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <!--<script src="./resources/static/js/jquery-1.11.3.min.js"></script>-->
+    <script>window.$ = window.jQuery = require('./resources/static/js/jquery-1.11.3.min.js');</script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="./resources/static/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!--导航栏start  navbar-fixed-top Toggle navigation-->
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">语音播报</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">设置<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a data-toggle="modal" data-target="#loginModal" href="#">登录</a></li>
+                        <li><a data-toggle="modal" data-target="#soundModal" href="#">语音设置</a></li>
+                        <li><a data-toggle="modal" data-target="#playModal" href="#">播放设置</a></li>
+                        <li><a data-toggle="modal" data-target="#configureModal" href="#">常规设置</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a data-toggle="modal" data-target="#getDataModal" href="#">数据更新</a></li>
+                        <li role="separator" class="divider"></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!--导航栏end-->
+<div class="container-fluid">
+    <!--tab导航页start-->
+    <ul id="myTabs" class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#home" role="tab" id="home-tab" data-toggle="tab" aria-controls="home" aria-expanded="true">
+                车次列表</a></li>
+        <li role="presentation">
+            <a href="#history" role="tab" id="history-tab" data-toggle="tab" aria-controls="history">
+                历史车次</a></li>
+        <li role="presentation">
+            <a href="#profile" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile">
+                及时任务</a></li>
+    </ul>
+    <!--tab导航页end-->
+    <div id="myTabContent" class="tab-content">
+        <div role="tabpanel" class="tab-pane fade in active" id="home" aria-labelledby="home-tab">
+            <div class="navbar-form navbar-right" role="search">
+                <button play-type="01" data-loading-text="播放" type="button" id="play"
+                        class="btn btn-success">播放
+                </button>
+                <button type="button" id="stop" class="btn btn-warning">停止</button>
+            </div>
+            <!--车次列表start-->
+            <table class="table table-hover table-bordered table-responsive">
+                <thead>
+                <tr>
+                    <th class="text-center">开车时间</th>
+                    <th class="text-center">班次</th>
+                    <th class="text-center">终点站</th>
+                    <!--<th>运营商</th>-->
+                    <th class="text-center">车型</th>
+                    <th class="text-center">站台号</th>
+                    <th class="text-center">播放次数</th>
+                    <th class="text-center" width="300px">操作</th>
+                </tr>
+                </thead>
+                <tbody id="viewCarList">
+                </tbody>
+            </table>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="history" aria-labelledby="history-tab">
+            <div class="navbar-form navbar-right" role="search">
+            </div>
+            <table class="table table-hover table-bordered table-responsive">
+                <thead>
+                <tr class="text-center">
+                    <th class="text-center">开车时间</th>
+                    <th class="text-center">班次</th>
+                    <th class="text-center">终点站</th>
+                    <!--<th>运营商</th>-->
+                    <th class="text-center">车型</th>
+                    <th class="text-center">站台号</th>
+                    <th class="text-center">播放次数</th>
+                    <th class="text-center" width="300px">还原</th>
+                </tr>
+                </thead>
+                <tbody id="historyList"></tbody>
+            </table>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="profile" aria-labelledby="profile-tab">
+            <!--插播start-->
+            <div class="row" style="padding: 1em">
+                <div class="col-lg-6 form-inline">
+                    <div class="input-group">
+                        <input type="text" name="speech" class="form-control" placeholder="请输入">
+                        <span class="input-group-btn">
+                        <button play-type="02" data-loading-text="插播" class="btn btn-default"
+                                id="speechPlay" type="button">
+                            插播
+                        </button>
+                        <button play-type="03" type="button" data-loading-text="全部播放" id="speechJob"
+                                class="btn btn-success">全部播放
+                        </button>
+                        <button type="button" id="speechStop" class="btn btn-warning">停止</button>
+                        <button type="button" id="addSpeech" class="btn btn-success" data-toggle="modal"
+                                data-target="#addSpeechModal">添加
+                        </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!--end-->
+            <!--任务列表start-->
+            <table class="table table-hover table-bordered table-responsive">
+                <thead>
+                <tr class="text-center">
+                    <th class="text-center" width="15%">标题</th>
+                    <th class="text-center">内容</th>
+                    <th class="text-center" width="300px">操作</th>
+                </tr>
+                </thead>
+                <tbody id="speechList"></tbody>
+            </table>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="stationDrop1" aria-labelledby="station-tab">
+            <h1>stationDrop1</h1>
+
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="stationDrop2" aria-labelledby="station-tab">
+            <h1>stationDrop2</h1>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="dropdown1" aria-labelledby="dropdown1-tab">
+            <h1>dropdown1</h1>
+        </div>
+        <div role="tabpanel" class="tab-pane fade" id="dropdown2" aria-labelledby="dropdown2-tab">
+            <h1>dropdown2</h1>
+        </div>
+    </div>
+</div>
+
+<!--登录框start-->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
+     aria-hidden="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="loginModalLabel">用户登录</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputUser">用户名</label>
+                    <input type="text" class="form-control" name="user" id="exampleInputUser" placeholder="user">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword">密码</label>
+                    <input type="password" class="form-control" name="password" id="exampleInputPassword"
+                           placeholder="password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="login" class="btn btn-primary" data-dismiss="modal">登录</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end-->
+<!--config播音配置start-->
+<div class="modal fade" id="soundModal" tabindex="-1" role="dialog" aria-labelledby="configModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="configModalLabel">语音设置</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputSpeed">语速</label>
+                    <input type="number" min="0" class="form-control" name="speed" id="exampleInputSpeed"
+                           placeholder="speed" onkeyup="this.value=this.value.replace(/\D/g,'')"
+                           onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                           value="1">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputVolume">音量</label>
+                    <input type="number" min="0" class="form-control" name="volume" id="exampleInputVolume"
+                           placeholder="volume" onkeyup="this.value=this.value.replace(/\D/g,'')"
+                           onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                           value="1">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputTimbre">音色</label>
+                    <select name="timbre" class="form-control" id="exampleInputTimbre">
+                        <option>普通话男声</option>
+                        <option>普通话女声</option>
+                        <option>粤语男声</option>
+                        <option>粤语女声</option>
+                        <option>英语男声</option>
+                        <option>英语女声</option>
+                        <option>中英混合男</option>
+                        <option>中英混合女声</option>
+                        <option>粤英混合男声</option>
+                        <option>粤英混合声</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="saveSoundConfig" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="playModal" tabindex="-1" role="dialog" aria-labelledby="playModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="playModalLabel">播放设置</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputAheadTime">提前播放</label>
+
+                    <div class="input-group">
+                        <input type="number" min="0" class="form-control" name="aheadTime" id="exampleInputAheadTime"
+                               placeholder="aheadTime" onkeyup="this.value=this.value.replace(/\D/g,'')"
+                               onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                               value="15">
+
+                        <div class="input-group-addon">分钟</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputRulePlay">播放规则</label>
+
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="rulePlay" id="exampleInputRulePlay"
+                               placeholder="rulePlay">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" data-container="body" data-toggle="popover"
+                                    data-placement="right"
+                                    data-content="
+                                    <p>尊敬的旅客，去往终点站、${terminus}、班次为${carNumber}号的汽车、将在${time}准时发车，请旅客们提前去往${platformNo}站台，谢谢！</p>
+                                    <p>${terminus}：终点站</p>
+                                    <p>${carNumber}：班次号</p>
+                                    <p>${time}：时间</p>
+                                    <p>${platformNo}：站台</p>
+                                    ">例子
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputNumber">重播次数</label>
+
+                    <div class="input-group">
+                        <input type="number" min="1" class="form-control" name="taskNumber" id="exampleInputNumber"
+                               placeholder="number" onkeyup="this.value=this.value.replace(/\D/g,'')"
+                               onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                               value="1">
+
+                        <div class="input-group-addon">次</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="savePlayConfig" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="configureModal" tabindex="-1" role="dialog" aria-labelledby="configureModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="configureModalLabel">常规设置</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputDataUrl">请求地址</label>
+                    <input type="text" class="form-control" name="dataUrl" id="exampleInputDataUrl" placeholder="dataUrl">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="saveConfigureConfig" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--自定义任务-->
+<div class="modal fade" id="addSpeechModal" tabindex="-1" role="dialog" aria-labelledby="addSpeechModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addSpeechModalLabel">添加</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputTitle">标题</label>
+                    <input type="text" class="form-control" name="title" id="exampleInputTitle" placeholder="title">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputContent">内容</label>
+                    <textarea class="form-control" rows="3" name="content" id="exampleInputContent"
+                              placeholder="content"></textarea>
+                </div>
+                <input type="hidden" name="speechId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="saveSpeech" class="btn btn-primary" data-dismiss="modal">保存</button>
+                <button type="button" id="updateSpeech" class="btn btn-primary hide" data-dismiss="modal"
+                        onclick="updateSpeech()">修改
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--定时跟新-->
+<div class="modal fade" id="getDataModal" tabindex="-1" role="dialog" aria-labelledby="getDataModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="getDataModalLabel">更新数据</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputUpdateTime">定时更新</label>
+
+                    <div class="input-group">
+                        <input type="number" min="1" class="form-control" name="updateTime" id="exampleInputUpdateTime"
+                               placeholder="updateTime" onkeyup="this.value=this.value.replace(/\D/g,'')"
+                               onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                               value="30">
+
+                        <div class="input-group-addon">分钟</div>
+                    </div>
+                </div>
+                <button type="button" id="getData" data-loading-text="请等待..." class="btn btn-success">数据更新</button>
+                <span style="padding: 0 1em;color: red" id="countdown" class="hide"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="saveGetDataConfig" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--警告框-->
+<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="alertModalLabel">警告</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-center" id="alertModalText" style="color: red;font-size: 26px"></p>
+
+                <button type="button" class="fade btn btn-primary btn-lg" data-toggle="modal"
+                        data-target="#alertModal"></button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--车次播报次数修改-->
+<div class="modal fade" id="modifyCarListViewModal" tabindex="-1" role="dialog"
+     aria-labelledby="modifyCarListViewModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modifyCarListViewModalLabel">修改播报次数</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputTaskNumber">重播次数</label>
+
+                    <div class="input-group">
+                        <input type="number" min="1" class="form-control" name="taskNumber" id="exampleInputTaskNumber"
+                               placeholder="taskNumber" onkeyup="this.value=this.value.replace(/\D/g,'')"
+                               onafterpaste="this.value=this.value.replace(/\D/g,'')"
+                               value="1">
+
+                        <div class="input-group-addon">次</div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="taskNumberId">
+
+            <div class="modal-footer">
+                <button type="button" id="saveCarList" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="./resources/app/config.js"></script>
+<script src="./resources/app/login.js"></script>
+<script src="./resources/app/data.js"></script>
+<script src="./resources/app/speech.js"></script>
+</body>
+</html>
