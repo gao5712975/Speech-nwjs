@@ -7,6 +7,7 @@ var http = require("http");
 var logger = require('./resources/libs/logger').getLogger('speech.js');
 var utils = require('./resources/libs/utils');
 var SDK = require('./resources/libs/play');
+var TTS = require('./resources/libs/libokvtts');
 
 
 /*---------------play-----------------*/
@@ -182,6 +183,8 @@ function singlePlay(id) {
 
         }
     });
+    //TTS.libokvtts.OKVInit();
+    //TTS.libokvtts.OKVPlay(data);
     $("#" + id).attr("class", "text-center");
     recoveryPlay();
 }
