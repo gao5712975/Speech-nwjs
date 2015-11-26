@@ -6,26 +6,41 @@ var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
 
 var logger = require('./resources/libs/logger').getLogger('config.js');
+var utils = require('./resources/libs/utils');
+var SDK = require('./resources/libs/play');
 
 global.dataUrl = "http://127.0.0.1:3001/Speech";//发布地址
 
-var viewConfig = function(){
+var config = {
+    $speed: $("#soundModal input[name=speed]"),
+    $volume: $("#soundModal input[name=volume]"),
+    $timbre: $("#soundModal input[name=timbre]"),
+    $taskNumber: $("#playModal input[name=taskNumber]"),
+    $aheadTime: $("#playModal input[name=aheadTime]"),
+    $rulePlay: $("#playModal input[name=rulePlay]"),
+    $updateTime: $("#getDataModal input[name=updateTime]"),
+    $user: $("#loginModal input[name=user]"),
+    $password: $("#loginModal input[name=password]"),
+    $dataUrl: $("#configureModal input[name=dataUrl]")
+};
+
+var viewConfig = function () {
     fs.exists(nwDir + '/config.ini', function (exists) {
         if (exists) {
             var data = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
-            $("#soundModal input[name=speed]").val(data.sound.speed);
-            $("#soundModal input[name=volume]").val(data.sound.volume);
-            $("#soundModal select[name=timbre]").val(data.sound.timbre);
-            $("#playModal input[name=taskNumber]").val(data.play.taskNumber);
-            $("#playModal input[name=aheadTime]").val(data.play.aheadTime);
-            $("#playModal input[name=rulePlay]").val(data.play.rulePlay);
-            $("#getDataModal input[name=updateTime]").val(data.updateData.updateTime);
-            $("#loginModal input[name=user]").val(data.login.user);
-            $("#loginModal input[name=password]").val(data.login.password);
-            $("#configureModal input[name=dataUrl]").val(data.urlConfig.dataUrl);
+            config.$speed.val(data.sound.speed);
+            config.$volume.val(data.sound.volume);
+            config.$timbre.val(data.sound.timbre);
+            config.$taskNumber.val(data.play.taskNumber);
+            config.$aheadTime.val(data.play.aheadTime);
+            config.$rulePlay.val(data.play.rulePlay);
+            config.$updateTime.val(data.updateData.updateTime);
+            config.$user.val(data.login.user);
+            config.$password.val(data.login.password);
+            config.$dataUrl.val(data.urlConfig.dataUrl);
 
             global.dataUrl = data.urlConfig.dataUrl;
-        }else{
+        } else {
             fs.createWriteStream(nwDir + '/config.ini', {start: 0, flags: "w", encoding: "utf8"});
             var c = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
             c.scope = "local";
@@ -36,9 +51,10 @@ var viewConfig = function(){
 
 var saveSoundConfig = function () {
     $("#saveSoundConfig").click(function () {
-        var speed = $("#soundModal input[name=speed]").val();
-        var volume = $("#soundModal input[name=volume]").val();
-        var timbre = $("#soundModal select[name=timbre]").val();
+        console.info(config.$speed.val());
+        var speed = config.$speed.val();
+        var volume = config.$volume.val();
+        var timbre = config.$timbre.val();
         var s = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (s.sound == undefined) {
             s.sound = {};
@@ -46,16 +62,20 @@ var saveSoundConfig = function () {
         s.sound.speed = speed;
         s.sound.volume = volume;
         s.sound.timbre = timbre;
-        fs.writeFileSync(nwDir + "/config.ini", ini.stringify(s), {start: 0, flags: "w", encoding: "utf8"});
-        //TODO 同步语音合成
+        SDK.speechConfig(s.sound, function (data) {
+            if (data.status == '01') {
+                logger.info(s.sound);
+                fs.writeFileSync(nwDir + "/config.ini", ini.stringify(s), {start: 0, flags: "w", encoding: "utf8"});
+            }
+        });
     });
 };
 
 var savePlayConfig = function () {
     $("#savePlayConfig").click(function () {
-        var taskNumber = $("#playModal input[name=taskNumber]").val();
-        var aheadTime = $("#playModal input[name=aheadTime]").val();
-        var rulePlay = $("#playModal input[name=rulePlay]").val();
+        var taskNumber = config.$taskNumber.val();
+        var aheadTime = config.$aheadTime.val();
+        var rulePlay = config.$rulePlay.val();
 
         var p = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (p.play == undefined) {
@@ -67,15 +87,15 @@ var savePlayConfig = function () {
         p.play.aheadTime = aheadTime;
         p.play.rulePlay = rulePlay;
         fs.writeFileSync(nwDir + "/config.ini", ini.stringify(p), {start: 0, flags: "w", encoding: "utf8"});
-        if(oldTaskNumber != taskNumber){
-            viewTable();
+        if (oldTaskNumber != taskNumber) {
+            utils.viewTable();
         }
     });
 };
 
-var saveGetDataConfig = function(){
+var saveGetDataConfig = function () {
     $("#saveGetDataConfig").click(function () {
-        var updateTime = $("#getDataModal input[name=updateTime]").val();
+        var updateTime = config.$updateTime.val();
         var d = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (d.updateData == undefined) {
             d.updateData = {};
@@ -86,10 +106,9 @@ var saveGetDataConfig = function(){
 };
 
 
-
-var saveConfigureConfig = function(){
+var saveConfigureConfig = function () {
     $("#saveConfigureConfig").click(function () {
-        var dataUrl = $("#configureModal input[name=dataUrl]").val();
+        var dataUrl = config.$dataUrl.val();
         var l = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (l.urlConfig == undefined) {
             l.urlConfig = {};
@@ -97,7 +116,7 @@ var saveConfigureConfig = function(){
         var oldDataUrl = l.urlConfig.dataUrl;
         l.urlConfig.dataUrl = dataUrl;
         fs.writeFileSync(nwDir + "/config.ini", ini.stringify(l), {start: 0, flags: "w", encoding: "utf8"});
-        if(oldDataUrl != dataUrl){
+        if (oldDataUrl != dataUrl) {
             global.dataUrl = dataUrl;
         }
     });

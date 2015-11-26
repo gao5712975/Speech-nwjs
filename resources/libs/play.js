@@ -7,6 +7,7 @@ var http = require("http");
 var querystring = require("querystring");
 var schedule = require("node-schedule");
 var logger = require('./logger').getLogger('play.js');
+var utils = require('./utils');
 
 /**
  *
@@ -27,10 +28,12 @@ var speechPlay = function (dataStr, callblack) {
                     callblack(JSON.parse(postData));
                 }).on("error", function (e) {
                     logger.error("speechPlay" + e.message);
+                    utils.alertModal("系统错误");
                 });
             });
             manage.on('error', function (e) {
                 logger.error("speechPlay" + e.message);
+                utils.alertModal("服务连接失败");
             });
             manage.write(querystring.stringify(dataStr));
             manage.end();
@@ -75,10 +78,14 @@ var play = function (dataStr,  callblack) {
                        callblack(JSON.parse(postData));
                    }).on("error", function (e) {
                        logger.error("play" + e.message);
+                       callblack({status: 503});
+                       utils.alertModal("系统错误");
                    });
                });
                manage.on('error', function (e) {
                    logger.error("play" + e.message);
+                   callblack({status: 404});
+                   utils.alertModal("服务连接失败");
                });
                delete dataStr.id;
                delete dataStr.aheadTime;
@@ -102,8 +109,8 @@ var stop = function (callblack) {
     var optUrl = url.parse(global.dataUrl + "/admin/stop.do");
     optUrl.method = "post";
     optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+    var postData = "";
     var manage = http.request(optUrl, function (ma) {
-        var postData = "";
         ma.on("data", function (data) {
             postData += data;
         }).on("end", function () {
@@ -112,17 +119,47 @@ var stop = function (callblack) {
             }
             callblack(JSON.parse(postData));
         }).on("error", function (e) {
+            callblack({status: 503});
             logger.error(e.message);
+            utils.alertModal("系统错误");
         });
     });
     manage.on('error', function (e) {
         logger.error("stop" + e.message);
+        callblack({status: 404});
+        utils.alertModal("服务连接失败");
     });
+    manage.end();
+};
+
+var speechConfig = function (data,callblack) {
+    var optUrl = url.parse(global.dataUrl + "/admin/speechConfig.do");
+    optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+    optUrl.method = "post";
+    var postData = "";
+    var manage = http.request(optUrl, function (ma) {
+        ma.on("data", function (data) {
+            postData += data;
+        }).on("end", function () {
+            callblack({status: postData});
+        }).on("error", function (e) {
+            logger.error(e.message);
+            callblack({status: 503});
+            utils.alertModal("系统错误");
+        });
+    });
+    manage.on('error', function (e) {
+        logger.error(e.message);
+        callblack({status: 404});
+        utils.alertModal("服务连接失败");
+    });
+    manage.write(querystring.stringify(data));
     manage.end();
 };
 
 module.exports = {
     speechPlay: speechPlay,
     play: play,
-    stop: stop
+    stop: stop,
+    speechConfig:speechConfig
 };

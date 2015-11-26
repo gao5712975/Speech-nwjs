@@ -3,12 +3,7 @@
  */
 'use strict';
 
-var $;
-
-var initWindows  = function ($$) {
-    $ = $$;
-    return module.exports;
-};
+var $ = global.$;
 
 var alertModal = function (text) {
     $("#alertModalText").text(text);
@@ -77,11 +72,16 @@ var rulePlay = {
 var viewTableFun = {
     appendCarList: function (json, id, cb) {
         var s = "";
-        var num = $("#playModal input[name=taskNumber]").val();
+        var number = $("#playModal input[name=taskNumber]").val();
+        if(+number === 0){
+            number = 1;
+        }
         $.each(json, function (index, obj) {
-            obj.number = num;
+            if(!obj.numberMo){
+                obj.number = number;
+            }
             var select = "<button type='button'data-loading-text='立即播放' class='btn btn-success singleCarList' onclick=\"singleCarListPlay(\'" + obj.id + "\')\">立即播放</button> <button type='button' class='btn btn-info'onclick=\"modifyCarListView(\'" + obj.id + "\')\">修改</button>";
-            s += "<tr data-json=\'" + JSON.stringify(obj) + "\' id=\'" + obj.id + "\' class='text-center'><td>" + obj.time + "</td><td>" + obj.carNumber + "</td><td>" + obj.terminus + "</td><td>" + obj.carType + "</td><td>" + obj.platformNo + "</td><td>" + num + "</td><td>" + select + "</td></tr>";
+            s += "<tr data-json=\'" + JSON.stringify(obj) + "\' id=\'" + obj.id + "\' class='text-center'><td>" + obj.time + "</td><td>" + obj.carNumber + "</td><td>" + obj.terminus + "</td><td>" + obj.carType + "</td><td>" + obj.platformNo + "</td><td>" +  obj.number + "</td><td>" + select + "</td></tr>";
         });
         setTimeout(function () {
             cb(id, s);
@@ -128,9 +128,45 @@ var viewTableFun = {
     }
 };
 
+/*从本地取数据展现*/
+
+var viewTable = function () {
+    var data = global.carData;
+    var carArray = new Array(0);//车次列表
+    var oldArray = new Array(0);//历史车次列表
+    for (var s in data) {
+        var hour = new Date().getHours();
+        var minutes = new Date().getMinutes();
+        var hour_d = parseInt(data[s].time.split(":")[0]);
+        var minutes_d = parseInt(data[s].time.split(":")[1]);
+        /*过滤已修改的播报次数的车次*/
+        if (JSON.stringify(global.taskModifyArray).indexOf(data[s].id) != -1) {
+            for (var i = 0, j = global.taskModifyArray.length; i < j; i++) {
+                if (global.taskModifyArray[i].id == data[s].id) {
+                    data[s].number = global.taskModifyArray[i].number;
+                    data[s].numberMo = 1;
+                }
+            }
+        }
+        /*过滤到期时间*/
+        if (hour_d > hour || (hour_d == hour && minutes_d + 1 > minutes)) {
+            /*已播报的任务过滤到历史列表中*/
+            if (global.carBusId.indexOf(data[s].id) == -1) {
+                carArray.push(data[s]);
+            } else {
+                oldArray.push(data[s]);
+            }
+        } else {
+            oldArray.push(data[s]);
+        }
+    }
+    viewTableFun.viewCarList(carArray);
+    viewTableFun.viewHistory(oldArray);
+};
+
 module.exports = {
-    initWindows: initWindows,
     alertModal: alertModal,
     rulePlay: rulePlay,
-    viewTableFun: viewTableFun
+    viewTableFun: viewTableFun,
+    viewTable:viewTable
 };

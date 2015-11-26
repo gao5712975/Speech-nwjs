@@ -12,7 +12,7 @@ var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
 
 var logger = require('./resources/libs/logger').getLogger('login.js');
-var utils = require('./resources/libs/utils').initWindows($);
+var utils = require('./resources/libs/utils');
 
 
 global.company_id = "";

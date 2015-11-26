@@ -12,7 +12,7 @@ var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
 
 var logger = require('./resources/libs/logger').getLogger('data.js');
-var utils = require('./resources/libs/utils').initWindows($);
+var utils = require('./resources/libs/utils');
 
 //!*根据地址获取数据*!
 global.carData = [];
@@ -50,7 +50,7 @@ var getDate = function () {
                         }
                     }, 1000);
 
-                    viewTable();
+                    utils.viewTable();
                 } else if (json.status == "00") {
                     utils.alertModal("请登录");//没有登录
                 } else {
@@ -70,42 +70,6 @@ var getDate = function () {
 };
 
 
-/*从本地取数据展现*/
-var carArray = [];//车次列表
-var oldArray = [];//历史车次列表
-global.viewTable = function () {
-    var data = global.carData;
-    carArray.length = 0;
-    oldArray.length = 0;
-    for (var s in data) {
-        var hour = new Date().getHours();
-        var minutes = new Date().getMinutes();
-        var hour_d = parseInt(data[s].time.split(":")[0]);
-        var minutes_d = parseInt(data[s].time.split(":")[1]);
-        /*过滤已修改的播报次数的车次*/
-        if (JSON.stringify(global.taskModifyArray).indexOf(data[s].id) != -1) {
-            for (var i = 0, j = global.taskModifyArray.length; i < j; i++) {
-                if (global.taskModifyArray[i].id == data[s].id) {
-                    data[s].number = global.taskModifyArray[i].number;
-                }
-            }
-        }
-        /*过滤到期时间*/
-        if (hour_d > hour || (hour_d == hour && minutes_d + 1 > minutes)) {
-            /*已播报的任务过滤到历史列表中*/
-            if (global.carBusId.indexOf(data[s].id) == -1) {
-                carArray.push(data[s]);
-            } else {
-                oldArray.push(data[s]);
-            }
-        } else {
-            oldArray.push(data[s]);
-        }
-    }
-    utils.viewTableFun.viewCarList(carArray);
-    utils.viewTableFun.viewHistory(oldArray);
-};
-
 /*保存以修改播报次数的车次信息 数组长度大于500，推陈出新*/
 global.taskModifyArray = [];
 var saveCarListNumber = function () {
@@ -116,7 +80,7 @@ var saveCarListNumber = function () {
         var taskNumber = $("#modifyCarListViewModal input[name=taskNumber]").val();
         data.number = parseInt(taskNumber);
 
-        global.taskModifyArray.unshift(data);
+        global.taskModifyArray.unshift({id:data.id,number:data.number});
         if (global.taskModifyArray.length >= 1000) {
             global.taskModifyArray.pop();
         }
@@ -146,18 +110,11 @@ var saveSpeech = function () {
         var key = uuid.v1().replace(/\-/g, "");
         fs.exists(nwDir + '/tempJob.ini', function (exists) {
             if (!exists) {
-                console.info(1)
-
                 fs.createWriteStream(nwDir + '/tempJob.ini', {start: 0, flags: "w", encoding: "utf8"});
-                console.info(2)
-
                 var c = ini.parse(fs.readFileSync(nwDir + "/tempJob.ini", "utf8"));
-                console.info(3)
-
                 c.scope = "local";
                 fs.writeFileSync(nwDir + "/tempJob.ini", ini.stringify(c));
             }
-            console.info(4)
             var sp = ini.parse(fs.readFileSync(nwDir + "/tempJob.ini", "utf8"));
             if (sp.content == undefined) {
                 sp.content = {};
@@ -209,7 +166,7 @@ var init = function () {
     /*手动获取数据*/
     getDate();
     /*展现本地数据*/
-    global.viewTable();
+    utils.viewTable();
     /*保存以修改播报次数的车次信息*/
     saveCarListNumber();
     /*自动获取数据*/

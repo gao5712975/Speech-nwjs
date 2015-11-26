@@ -9,13 +9,13 @@ var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
 
 
-var wininet = ffi.Library('Wininet.dll', {
-    'InternetGetConnectedState': ['bool', ['int', 'int']]
-});
-
-var intPtr = ref.alloc('int');
-console.log(wininet.InternetGetConnectedState(0, 0));
-console.log(nwDir);
+//var wininet = ffi.Library('Wininet.dll', {
+//    'InternetGetConnectedState': ['bool', ['int', 'int']]
+//});
+//
+//var intPtr = ref.alloc('int');
+//console.log(wininet.InternetGetConnectedState(0, 0));
+//console.log(nwDir);
 
 /*
  1    0 00011AD0 OKVGetLangMode
@@ -110,41 +110,66 @@ console.log(nwDir);
 
 //var data = msc.QTTSAudioGet(sess_id,audio_len,synth_status,ret);
 //console.log(data);
+// var outNumber = ref.alloc('string');
+// var actualNumber = outNumber.deref();
+// console.info(actualNumber);
 
+// var path = "D:\\bin";
+// var TimeValPtr = ref.refType('string');
+var libokvtts = ffi.Library(nwDir + '\\libokvtts.dll', {
+    'OKVGetLangMode':['int',[]],
+    'OKVGetSpeed':['int',[]],
+    'OKVGetSupportLang':['int',[]],
+    'OKVGetVolume':['int',[]],
+    'OKVInit':['int',['string']],
+    'OKVPlay':['int',['string']],
+    'OKVSetLangMode': ['int', [ 'int']],
+    'OKVSetSpeed': ['int', [ 'int']],
+    'OKVSetVolume': ['int', [ 'int']],
+    'OKVStop': ['int', []],
+    'OKVUnInit': ['int', ['void']]
+});
 
-//var libokvtts = ffi.Library(nwDir+'\\bin\\libokvtts.dll', {
-//    //'OKVGetLangMode':['int',[]],
-//    //'OKVGetSpeed':['int',[]],
-//    //'OKVGetSupportLang':['int',[]],
-//    //'OKVGetVolume':['int',[]],
-//    'OKVInit':['int',['string']],
-//    'OKVPlay':['int',['string']],
-//    'OKVSetLangMode': ['int', [ 'int']],
-//    'OKVSetSpeed': ['int', [ 'int']],
-//    'OKVSetVolume': ['int', [ 'int']],
-//    'OKVStop': ['int', []],
-//    'OKVUnInit': ['int', ['void']]
-//});
+setTimeout(function () {
+    console.log(nwDir);
+    console.info(libokvtts.OKVInit(nwDir));
+    console.info(libokvtts.OKVPlay('123'));
+},1000);
 
-////
+// var libokvtts = ffi.Library('libokvtts', {
+//     'OKVGetLangMode':['int',[]],
+//     'OKVGetSpeed':['int',[]],
+//     'OKVGetSupportLang':['int',[]],
+//     'OKVGetVolume':['int',[]],
+//     'OKVInit':['int',[]],
+//     'OKVPlay':['int',['string']],
+//     'OKVSetLangMode': ['int', [ 'int']],
+//     'OKVSetSpeed': ['int', [ 'int']],
+//     'OKVSetVolume': ['int', [ 'int']],
+//     'OKVStop': ['int', []],
+//     'OKVUnInit': ['int', ['void']]
+// });
+
+//console.log(libokvtts.OKVInit(new Buffer('D:\\bin')));
 //setTimeout(function () {
-//    console.log(nwDir);
-//    console.log(libokvtts.OKVInit(nwDir+'\\bin\\'));
+//    console.log(libokvtts.OKVInit(new Buffer('D:\\bin')));
+//},8000);
+//setTimeout(function () {
 //    console.log(libokvtts.OKVSetVolume(1));
 //    console.log(libokvtts.OKVPlay('1'));
-//},2000);
+//},10000);
 
-var arr = new Array(6);
-arr[0] = "George";
-arr[1] = "John";
-arr[2] = "Thomas";
-arr[3] = "James";
-arr[4] = "Adrew";
-arr[5] = "Martin";
-
-console.info(arr);
-arr.splice(2,1);
-console.info(arr);
+//var arr = new Array(6);
+//arr[0] = "George";
+//arr[1] = "John";
+//arr[2] = "Thomas";
+//arr[3] = "James";
+//arr[4] = "Adrew";
+//arr[5] = "Martin";
+//
+//console.info(arr);
+//arr.splice(2,1);
+//console.info(arr);
 /*
  1    0 000010C0 _Java_com_okvoice_tts_NativeEngine_getLangMode@8
  2    1 000010F0 _Java_com_okvoice_tts_NativeEngine_getSpeed@8

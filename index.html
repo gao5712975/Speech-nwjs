@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>electron</title>
+    <title>语音播报</title>
     <!-- 新 Bootstrap 核心 CSS 文件 -->
     <link rel="stylesheet" href="./resources/static/css/bootstrap.min.css">
     <!-- 可选的Bootstrap主题文件（一般不用引入） -->
     <link rel="stylesheet" href="./resources/static/css/bootstrap-theme.min.css">
     <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
     <!--<script src="./resources/static/js/jquery-1.11.3.min.js"></script>-->
-    <script>window.$ = window.jQuery = require('./resources/static/js/jquery-1.11.3.min.js');</script>
+    <script>window.$ = window.jQuery = require('./resources/static/js/jquery-1.11.3.min.js');global.$ = window.$;</script>
     <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
     <script src="./resources/static/js/bootstrap.min.js"></script>
 </head>
@@ -76,7 +76,6 @@
                     <th class="text-center">开车时间</th>
                     <th class="text-center">班次</th>
                     <th class="text-center">终点站</th>
-                    <!--<th>运营商</th>-->
                     <th class="text-center">车型</th>
                     <th class="text-center">站台号</th>
                     <th class="text-center">播放次数</th>
@@ -96,7 +95,6 @@
                     <th class="text-center">开车时间</th>
                     <th class="text-center">班次</th>
                     <th class="text-center">终点站</th>
-                    <!--<th>运营商</th>-->
                     <th class="text-center">车型</th>
                     <th class="text-center">站台号</th>
                     <th class="text-center">播放次数</th>
@@ -200,14 +198,14 @@
                     <input type="number" min="0" class="form-control" name="speed" id="exampleInputSpeed"
                            placeholder="speed" onkeyup="this.value=this.value.replace(/\D/g,'')"
                            onafterpaste="this.value=this.value.replace(/\D/g,'')"
-                           value="1">
+                           value="1" max="20">
                 </div>
                 <div class="form-group">
                     <label for="exampleInputVolume">音量</label>
                     <input type="number" min="0" class="form-control" name="volume" id="exampleInputVolume"
                            placeholder="volume" onkeyup="this.value=this.value.replace(/\D/g,'')"
                            onafterpaste="this.value=this.value.replace(/\D/g,'')"
-                           value="1">
+                           value="1" max="20">
                 </div>
                 <div class="form-group">
                     <label for="exampleInputTimbre">音色</label>
@@ -417,8 +415,7 @@
                     <div class="input-group">
                         <input type="number" min="1" class="form-control" name="taskNumber" id="exampleInputTaskNumber"
                                placeholder="taskNumber" onkeyup="this.value=this.value.replace(/\D/g,'')"
-                               onafterpaste="this.value=this.value.replace(/\D/g,'')"
-                               value="1">
+                               onafterpaste="this.value=this.value.replace(/\D/g,'')">
 
                         <div class="input-group-addon">次</div>
                     </div>

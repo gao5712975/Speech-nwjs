@@ -5,17 +5,16 @@
 var url = require("url");
 var http = require("http");
 var logger = require('./resources/libs/logger').getLogger('speech.js');
-var utils = require('./resources/libs/utils').initWindows($);
+var utils = require('./resources/libs/utils');
 var SDK = require('./resources/libs/play');
-
 
 
 /*---------------play-----------------*/
 global.statusPlay = 0;
 var play = function () {
     $("#play").click(function () {
-        global.statusPlay = 1;
         if ($("#viewCarList >tr").length != 0) {
+            global.statusPlay = 1;
             var json = $("#viewCarList").children("tr:first").attr("data-json");
             json = JSON.parse(json);
             var id = json.id;
@@ -23,7 +22,7 @@ var play = function () {
             var rule = $("#playModal input[name=rulePlay]").val();
             var rulePlay = utils.rulePlay.rulePlayStr(json, rule);
             var aheadTime = $("#playModal input[name=aheadTime]").val();
-            var data = {speech: rulePlay, id: id, time: json.time, aheadTime: aheadTime, taskNumber: number};
+            var data = {speech: rulePlay, id: id, time: json.time, aheadTime: aheadTime, taskNumber: +number};
 
             $("#" + id).attr("class", "success text-center");
             $("#play").button("loading");
@@ -36,6 +35,7 @@ var play = function () {
                     } else {
                         $("#viewCarList").children("tr[id=" + id + "]").remove();
                     }
+                    saveCarBusId(id);
                     recoveryPlay();
                     $("#" + id).attr("class", "text-center");
                 } else if (d.status == 2) {
@@ -58,15 +58,14 @@ var stop = function () {
         SDK.stop(function (d) {
             if (d.status == 1) {
                 global.statusPlay = 0;
-                $("#play").button("reset");
-                $("#speechJob").button("reset");
-                $("#speechPlay").button("reset");
-                $(".singleCarList").button("reset");
             }
+            $("#play").button("reset");
+            $("#speechJob").button("reset");
+            $("#speechPlay").button("reset");
+            $(".singleCarList").button("reset");
         })
     })
 };
-
 
 
 /*-----------speechPlay-----------*/
@@ -78,7 +77,6 @@ var speechPlay = function () {
         $("#speechPlay").button("loading");
         SDK.speechPlay({speech: $("input[name=speech]").val(), taskNumber: 1}, function (data) {
             if (data.status == 0) {
-                //TODO
                 recoveryPlay();
             }
             $("#speechPlay").button("reset");
@@ -90,8 +88,7 @@ var speechPlay = function () {
  * 播报过程中被其它任务中断需要恢复播报
  */
 var recoveryPlay = function () {
-    if(global.statusPlay == 1){
-        console.info("恢复");
+    if (global.statusPlay == 1) {
         $("#play").trigger("click");
     }
 };
@@ -112,7 +109,7 @@ var speechJob = function () {
         dataSpeech.attr("class", "success text-center");
         SDK.speechPlay({speech: JSON.parse(data).content, taskNumber: '1'}, function (dat) {
             if (dataSpeech != undefined) {
-                if (dat.status == 0 ) {
+                if (dat.status == 0) {
                     dataSpeech.attr("class", "text-center");
                     dataSpeech = dataSpeech.next("tr");
                     if (dataSpeech.attr("data-json") != undefined) {
@@ -181,7 +178,7 @@ function singlePlay(id) {
     var data = JSON.parse($("#" + id).attr("data-json")).content;
     $("#" + id).attr("class", "success text-center");
     SDK.speechPlay({speech: data, taskNumber: 1}, function (data) {
-        if(data.status == 0){
+        if (data.status == 0) {
 
         }
     });
