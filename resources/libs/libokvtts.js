@@ -23,27 +23,125 @@ var ffi = require('ffi');
  9    8 00012070 OKVSetVolume
  10    9 000120A0 OKVStop
  11    A 000120B0 OKVUnInit*/
+{
+    var libokvtts = ffi.Library('libokvtts.dll', {
+        'OKVGetLangMode': ['int', []],
+        'OKVGetSpeed': ['int', []],
+        'OKVGetSupportLang': ['int', []],
+        'OKVGetVolume': ['int', []],
+        'OKVInit': ['int', ['string']],
+        'OKVPlay': ['int', ['string']],
+        'OKVSetLangMode': ['int', ['int']],
+        'OKVSetSpeed': ['int', ['int']],
+        'OKVSetVolume': ['int', ['int']],
+        'OKVStop': ['int', []],
+        'OKVUnInit': ['int', ['void']]
+    });
 
-//var libokvtts = ffi.Library('libokvtts.dll', {
-//    'OKVGetLangMode':['int',[]],
-//    'OKVGetSpeed':['int',[]],
-//    'OKVGetSupportLang':['int',[]],
-//    'OKVGetVolume':['int',[]],
-//    'OKVInit':['int',['string']],
-//    'OKVPlay':['int',['string']],
-//    'OKVSetLangMode': ['int', [ 'int']],
-//    'OKVSetSpeed': ['int', [ 'int']],
-//    'OKVSetVolume': ['int', [ 'int']],
-//    'OKVStop': ['int', []],
-//    'OKVUnInit': ['int', ['void']]
+    libokvtts.OKVInit('.');
+}
+var status_play = 0; //初始状态0，停止后返回赋值1，播放完成后赋值0；
+
+/**
+ * 播放功能
+ * @param play_text 播放文字
+ * @param num 次数
+ * @param callback 状态返回
+ * @constructor
+ */
+var OKVPlay = function (play_text, num, callback) {
+    libokvtts.OKVPlay.async(play_text, function (err, res) {
+        if (res == 0 && status_play == 0) {
+            if (--num == 0) {
+                status_play = 0;
+                callback(res);
+            } else {
+                return OKVPlay(play_text, num,callback);
+            }
+        }
+    });
+};
+
+/**
+ * 停止
+ * @param callback 状态返回
+ * @constructor
+ */
+var OKVStop = function (callback) {
+    libokvtts.OKVStop.async(function (err, res) {
+        status_play = 1;
+        callback(res);
+    });
+};
+
+/**
+ *  设置语言模式
+ * @param langMode
+ * @param callback
+ * @constructor
+ */
+var OKVSetLangMode = function (langMode, callback) {
+    libokvtts.OKVSetLangMode.async(langMode,function (err, res) {
+        callback(res);
+    });
+};
+
+/**
+ * 设置语速
+ * @param speed
+ * @param callback
+ * @constructor
+ */
+var OKVSetSpeed = function (speed, callback) {
+    libokvtts.OKVSetSpeed.async(speed,function (err, res) {
+        callback(res);
+    });
+};
+
+/**
+ * 设置音量
+ * @param volume
+ * @param callback
+ * @constructor
+ */
+var OKVSetVolume = function (volume, callback) {
+    libokvtts.OKVSetVolume.async(volume,function (err, res) {
+        callback(res);
+    });
+};
+
+module.exports = {
+    libokvtts: libokvtts,
+    OKVSetVolume:OKVSetVolume,
+    OKVSetSpeed:OKVSetSpeed,
+    OKVSetLangMode:OKVSetLangMode,
+    OKVStop:OKVStop,
+    OKVPlay:OKVPlay
+};
+
+//OKVPlay('123', 5, function (res) {
+//
 //});
 //
 //setTimeout(function () {
-//    console.log(nwDir);
-//    console.info(libokvtts.OKVInit('.'));
-//    console.info(libokvtts.OKVPlay('123'));
-//},1000);
+//    OKVStop(function (res) {
+//        console.info(res);
+//    });
+//}, 200000);
 
+//console.info();
+//setTimeout(function () {
+//    libokvtts.OKVStop.async(function (err, res) {
+//        console.info(res);
+//    });
+//},2000);
+//libokvtts.OKVPlay.async('1231321321321234546', function (err, res) {
+//    console.info(res);
+//});
+//
+//libokvtts.OKVStop.async(function (err, res) {
+//   console.info(res);
+//});
 
 /*动态链接*/
 //var wininetDynamic = ffi.DynamicLibrary('libokvtts.dll');
@@ -52,48 +150,55 @@ var ffi = require('ffi');
 //console.log(s);
 //console.log(a);
 
-var libokvtts = {
-    OKVInit: function () {
-        var okvtts = ffi.DynamicLibrary('libokvtts.dll');
-        this.okvtts = okvtts;
-        return ffi.ForeignFunction(okvtts.get('OKVInit'), 'int', ['string'])('.');
-    },
-    OKVPlay: function (play_text) {
-        return ffi.ForeignFunction(this.okvtts.get('OKVPlay'), 'int', ['string'])(play_text);
-    },
-    OKVGetLangMode: function () {
-        return ffi.ForeignFunction(this.okvtts.get('OKVGetLangMode'), 'int', []);
-    },
-    OKVGetSpeed: function () {
-        return ffi.ForeignFunction(this.okvtts.get('OKVGetSpeed'), 'int', []);
-    },
-    OKVGetSupportLang: function () {
-        return ffi.ForeignFunction(this.okvtts.get('OKVGetSupportLang'), 'int', []);
-    },
-    OKVGetVolume: function () {
-        return ffi.ForeignFunction(this.okvtts.get('OKVGetVolume'), 'int', []);
-    },
-    OKVSetLangMode: function (langMode) {
-        return ffi.ForeignFunction(this.okvtts.get('OKVSetLangMode'), 'int', ['int'])(langMode);
-    },
-    OKVSetSpeed: function (speed) {
-        return ffi.ForeignFunction(this.okvtts.get('OKVSetSpeed'), 'int', ['int'])(speed);
-    },
-    OKVSetVolume: function (volume) {
-        return ffi.ForeignFunction(this.okvtts.get('OKVSetVolume'), 'int', ['int'])(volume);
-    },
-    OKVStop: function () {
-        return ffi.ForeignFunction(this.okvtts.get('OKVStop'), 'int', []);
-    },
-    OKVUnInit: function () {
-        return ffi.ForeignFunction(this.okvtts.get('OKVUnInit'), 'int', ['void']);
-    }
-};
-
-console.info(libokvtts.OKVInit());
-console.info(libokvtts.OKVUnInit());
-console.info(libokvtts.OKVPlay('1111111'));
-console.info(libokvtts.OKVSetSpeed(3));
+//var libokvtts = {
+//    OKVInit: function () {
+//        var okvtts = ffi.DynamicLibrary('libokvtts.dll');
+//        this.okvtts = okvtts;
+//        return ffi.ForeignFunction(okvtts.get('OKVInit'), 'int', ['string'])('.');
+//    },
+//    OKVPlay: function (play_text) {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVPlay'), 'int', ['string'])(play_text);
+//    },
+//    OKVGetLangMode: function () {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVGetLangMode'), 'int', []);
+//    },
+//    OKVGetSpeed: function () {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVGetSpeed'), 'int', []);
+//    },
+//    OKVGetSupportLang: function () {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVGetSupportLang'), 'int', []);
+//    },
+//    OKVGetVolume: function () {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVGetVolume'), 'int', []);
+//    },
+//    OKVSetLangMode: function (langMode) {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVSetLangMode'), 'int', ['int'])(langMode);
+//    },
+//    OKVSetSpeed: function (speed) {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVSetSpeed'), 'int', ['int'])(speed);
+//    },
+//    OKVSetVolume: function (volume) {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVSetVolume'), 'int', ['int'])(volume);
+//    },
+//    OKVStop: function () {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVStop'), 'int', []);
+//    },
+//    OKVUnInit: function () {
+//        return ffi.ForeignFunction(this.okvtts.get('OKVUnInit'), 'int', ['void']);
+//    }
+//};
+//
+//console.info(libokvtts.OKVInit());
+//setTimeout(function () {
+//    libokvtts.OKVUnInit.async(function (err, res) {
+//        console.info(res);
+//    })
+//},2000);
+//
+//libokvtts.OKVPlay.async('132132132113213213321',function (err, res) {
+//    console.info(res);
+//});
+//console.info(libokvtts.OKVSetSpeed(3));
 
 
 /*
@@ -109,6 +214,3 @@ console.info(libokvtts.OKVSetSpeed(3));
  10    9 000120A0 OKVStop
  11    A 000120B0 OKVUnInit*/
 
-module.exports = {
-    libokvtts: libokvtts
-};

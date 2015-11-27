@@ -4,6 +4,16 @@ var ini = require("ini");
 var path = require('path');
 var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
+var gui = require('nw.gui');
+var win = gui.Window.get();
+var TTS = require('./resources/libs/libokvtts');
+win.on('close', function() {
+    TTS.libokvtts.OKVUnInit.async(null,function (err,res) {
+        if(res == 0){
+            this.hide();
+        }
+    })
+});
 
 var logger = require('./resources/libs/logger').getLogger('config.js');
 var utils = require('./resources/libs/utils');
@@ -59,15 +69,25 @@ var saveSoundConfig = function () {
         if (s.sound == undefined) {
             s.sound = {};
         }
+        if(s.sound.speed != speed){
+            SDK.speechConfig(s.sound.speed, function (data) {
+                logger.info(speed);
+            });
+        }
+        if(s.sound.volume != volume){
+            SDK.volumeConfig(s.sound.volume, function (data) {
+                logger.info(volume);
+            });
+        }
+        if(s.sound.timbre != timbre){
+            SDK.timbreConfig(s.sound.timbre, function (data) {
+                logger.info(timbre);
+            });
+        }
         s.sound.speed = speed;
         s.sound.volume = volume;
         s.sound.timbre = timbre;
-        SDK.speechConfig(s.sound, function (data) {
-            if (data.status == '01') {
-                logger.info(s.sound);
-                fs.writeFileSync(nwDir + "/config.ini", ini.stringify(s), {start: 0, flags: "w", encoding: "utf8"});
-            }
-        });
+        fs.writeFileSync(nwDir + "/config.ini", ini.stringify(s), {start: 0, flags: "w", encoding: "utf8"});
     });
 };
 
