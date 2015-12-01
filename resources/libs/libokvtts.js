@@ -110,14 +110,14 @@ var OKVSetVolume = function (volume, callback) {
     });
 };
 
-module.exports = {
-    libokvtts: libokvtts,
-    OKVSetVolume:OKVSetVolume,
-    OKVSetSpeed:OKVSetSpeed,
-    OKVSetLangMode:OKVSetLangMode,
-    OKVStop:OKVStop,
-    OKVPlay:OKVPlay
-};
+//module.exports = {
+//    libokvtts: libokvtts,
+//    OKVSetVolume:OKVSetVolume,
+//    OKVSetSpeed:OKVSetSpeed,
+//    OKVSetLangMode:OKVSetLangMode,
+//    OKVStop:OKVStop,
+//    OKVPlay:OKVPlay
+//};
 
 //OKVPlay('123', 5, function (res) {
 //

@@ -8,6 +8,7 @@ var logger = require('./resources/libs/logger').getLogger('speech.js');
 var utils = require('./resources/libs/utils');
 var SDK = require('./resources/libs/play');
 
+
 /*---------------play-----------------*/
 global.statusPlay = 0;
 var play = function () {
@@ -78,6 +79,7 @@ var speechPlay = function () {
             if (data.status == 0) {
                 recoveryPlay();
             }
+            console.info(data.status);
             $("#speechPlay").button("reset");
         })
     })
@@ -155,7 +157,7 @@ function singleCarListPlay(id) {
     var number = json.number;
     var rule = $("#playModal input[name=rulePlay]").val();
     var rulePlay = utils.rulePlay.rulePlayStr(json, rule);
-    SDK.speechPlay({speech: rulePlay, taskNumber: number}, function (data) {
+    SDK.speechPlay({speech: rulePlay, taskNumber: number, id: id}, function (data) {
         if (data.status == 0) {
             var historyList = $("#historyList");
             /*历史列表中不存在就插入否则就移除*/

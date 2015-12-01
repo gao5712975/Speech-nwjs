@@ -69,9 +69,21 @@ var saveSoundConfig = function () {
         if (s.sound == undefined) {
             s.sound = {};
         }
-        SDK.speechConfig(s.sound, function (res) {
-            console.info(res);
-        });
+        if(s.sound.speed != speed){
+            SDK.speechConfig(s.sound.speed, function (data) {
+                logger.info(speed);
+            });
+        }
+        if(s.sound.volume != volume){
+            SDK.volumeConfig(s.sound.volume, function (data) {
+                logger.info(volume);
+            });
+        }
+        if(s.sound.timbre != timbre){
+            SDK.timbreConfig(s.sound.timbre, function (data) {
+                logger.info(timbre);
+            });
+        }
         s.sound.speed = speed;
         s.sound.volume = volume;
         s.sound.timbre = timbre;
