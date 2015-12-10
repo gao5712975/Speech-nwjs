@@ -3,6 +3,130 @@
  */
 'use strict';
 var ffi = require('ffi');
+var path = require('path');
+var nwPath = process.execPath;
+var nwDir = path.dirname(nwPath);
+{
+    var libokvtts = ffi.Library(nwDir+'\\libokvtts.dll', {
+        'OKVGetLangMode': ['int', []],
+        'OKVGetSpeed': ['int', []],
+        'OKVGetSupportLang': ['int', []],
+        'OKVGetVolume': ['int', []],
+        'OKVInit': ['int', ['string']],
+        'OKVPlay': ['int', ['string']],
+        'OKVSetLangMode': ['int', ['int']],
+        'OKVSetSpeed': ['int', ['int']],
+        'OKVSetVolume': ['int', ['int']],
+        'OKVStop': ['int', []],
+        'OKVUnInit': ['int', ['void']]
+    });
+    var init = libokvtts.OKVInit(nwDir);
+    if(init == 0){
+        console.info("初始化成功!!!");
+    }else{
+        console.info("初始化失败/(ㄒoㄒ)/~~");
+    }
+}
+var status_play = 0; //初始状态0，停止后返回赋值1，播放完成后赋值0；
+
+/**
+ * 播放功能
+ * @param play_text 播放文字
+ * @param num 次数
+ * @param callback 状态返回
+ * @constructor
+ */
+var OKVPlay = function (play_text, num, callback) {
+    libokvtts.OKVPlay.async(play_text, function (err, res) {
+        if (res == 0 && status_play == 0) {
+            if (--num == 0) {
+                status_play = 0;
+                callback({status:res});
+            } else {
+                return OKVPlay(play_text, num,callback);
+            }
+        }else if(res == 2){
+            callback({status:res});
+        }else{
+            callback({status:res});
+        }
+    });
+};
+
+/**
+ * 停止
+ * @param callback 状态返回
+ * @constructor
+ */
+var OKVStop = function (callback) {
+    libokvtts.OKVStop.async(function (err, res) {
+        if(res == 0){
+            status_play = 1;
+            callback({status:res});
+        }else if(res == 2){
+            callback({status:res});
+        }
+    });
+};
+
+/**
+ *  设置语言模式
+ * @param langMode
+ * @param callback
+ * @constructor
+ */
+var OKVSetLangMode = function (langMode, callback) {
+    libokvtts.OKVSetLangMode.async(langMode,function (err, res) {
+        if(res == 0){
+            callback({status:res});
+        }else if(res == 2){
+            callback({status:res});
+        }
+    });
+};
+
+/**
+ * 设置语速
+ * @param speed
+ * @param callback
+ * @constructor
+ */
+var OKVSetSpeed = function (speed, callback) {
+    libokvtts.OKVSetSpeed.async(speed,function (err, res) {
+        if(res == 0){
+            callback({status:res});
+        }else if(res == 2){
+            callback({status:res});
+        }
+    });
+};
+
+/**
+ * 设置音量
+ * @param volume
+ * @param callback
+ * @constructor
+ */
+var OKVSetVolume = function (volume, callback) {
+    libokvtts.OKVSetVolume.async(volume,function (err, res) {
+        if(res == 0){
+            callback({status:res});
+        }else if(res == 2){
+            callback({status:res});
+        }
+    });
+};
+
+module.exports = {
+    libokvtts: libokvtts,
+    OKVSetVolume:OKVSetVolume,
+    OKVSetSpeed:OKVSetSpeed,
+    OKVSetLangMode:OKVSetLangMode,
+    OKVStop:OKVStop,
+    OKVPlay:OKVPlay
+};
+
+
 //var wininet = ffi.Library('Wininet.dll', {
 //    'InternetGetConnectedState': ['bool', ['int', 'int']]
 //});
@@ -23,101 +147,6 @@ var ffi = require('ffi');
  9    8 00012070 OKVSetVolume
  10    9 000120A0 OKVStop
  11    A 000120B0 OKVUnInit*/
-{
-    var libokvtts = ffi.Library('libokvtts.dll', {
-        'OKVGetLangMode': ['int', []],
-        'OKVGetSpeed': ['int', []],
-        'OKVGetSupportLang': ['int', []],
-        'OKVGetVolume': ['int', []],
-        'OKVInit': ['int', ['string']],
-        'OKVPlay': ['int', ['string']],
-        'OKVSetLangMode': ['int', ['int']],
-        'OKVSetSpeed': ['int', ['int']],
-        'OKVSetVolume': ['int', ['int']],
-        'OKVStop': ['int', []],
-        'OKVUnInit': ['int', ['void']]
-    });
-
-    libokvtts.OKVInit('.');
-}
-var status_play = 0; //初始状态0，停止后返回赋值1，播放完成后赋值0；
-
-/**
- * 播放功能
- * @param play_text 播放文字
- * @param num 次数
- * @param callback 状态返回
- * @constructor
- */
-var OKVPlay = function (play_text, num, callback) {
-    libokvtts.OKVPlay.async(play_text, function (err, res) {
-        if (res == 0 && status_play == 0) {
-            if (--num == 0) {
-                status_play = 0;
-                callback(res);
-            } else {
-                return OKVPlay(play_text, num,callback);
-            }
-        }
-    });
-};
-
-/**
- * 停止
- * @param callback 状态返回
- * @constructor
- */
-var OKVStop = function (callback) {
-    libokvtts.OKVStop.async(function (err, res) {
-        status_play = 1;
-        callback(res);
-    });
-};
-
-/**
- *  设置语言模式
- * @param langMode
- * @param callback
- * @constructor
- */
-var OKVSetLangMode = function (langMode, callback) {
-    libokvtts.OKVSetLangMode.async(langMode,function (err, res) {
-        callback(res);
-    });
-};
-
-/**
- * 设置语速
- * @param speed
- * @param callback
- * @constructor
- */
-var OKVSetSpeed = function (speed, callback) {
-    libokvtts.OKVSetSpeed.async(speed,function (err, res) {
-        callback(res);
-    });
-};
-
-/**
- * 设置音量
- * @param volume
- * @param callback
- * @constructor
- */
-var OKVSetVolume = function (volume, callback) {
-    libokvtts.OKVSetVolume.async(volume,function (err, res) {
-        callback(res);
-    });
-};
-
-//module.exports = {
-//    libokvtts: libokvtts,
-//    OKVSetVolume:OKVSetVolume,
-//    OKVSetSpeed:OKVSetSpeed,
-//    OKVSetLangMode:OKVSetLangMode,
-//    OKVStop:OKVStop,
-//    OKVPlay:OKVPlay
-//};
 
 //OKVPlay('123', 5, function (res) {
 //

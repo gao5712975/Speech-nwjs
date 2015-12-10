@@ -9,9 +9,18 @@
     <link rel="stylesheet" href="./resources/static/css/bootstrap-theme.min.css">
     <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
     <!--<script src="./resources/static/js/jquery-1.11.3.min.js"></script>-->
-    <script>window.$ = window.jQuery = require('./resources/static/js/jquery-1.11.3.min.js');global.$ = window.$;</script>
+    <script>window.$ = window.jQuery = require('./resources/static/js/jquery-1.11.3.min.js');
+    global.$ = window.$;</script>
     <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
     <script src="./resources/static/js/bootstrap.min.js"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="popover"]').popover({
+                html: true,
+                animation: false
+            });
+        });
+    </script>
 </head>
 <body>
 <!--导航栏start  navbar-fixed-top Toggle navigation-->
@@ -210,16 +219,16 @@
                 <div class="form-group">
                     <label for="exampleInputTimbre">音色</label>
                     <select name="timbre" class="form-control" id="exampleInputTimbre">
-                        <option>普通话男声</option>
-                        <option>普通话女声</option>
-                        <option>粤语男声</option>
-                        <option>粤语女声</option>
-                        <option>英语男声</option>
-                        <option>英语女声</option>
-                        <option>中英混合男</option>
-                        <option>中英混合女声</option>
-                        <option>粤英混合男声</option>
-                        <option>粤英混合声</option>
+                        <option value="1">普通话男声</option>
+                        <option value="2">普通话女声</option>
+                        <option value="3">粤语男声</option>
+                        <option value="4">粤语女声</option>
+                        <option value="5">英语男声</option>
+                        <option value="6">英语女声</option>
+                        <option value="7">中英混合男</option>
+                        <option value="8">中英混合女声</option>
+                        <option value="9">粤英混合男声</option>
+                        <option value="10">粤英混合声</option>
                     </select>
                 </div>
             </div>
@@ -303,8 +312,12 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
+                    <label for="exampleInputLoginUrl">登录地址</label>
+                    <input type="text" class="form-control" name="loginUrl" id="exampleInputLoginUrl"
+                           placeholder="loginUrl">
                     <label for="exampleInputDataUrl">请求地址</label>
-                    <input type="text" class="form-control" name="dataUrl" id="exampleInputDataUrl" placeholder="dataUrl">
+                    <input type="text" class="form-control" name="dataUrl" id="exampleInputDataUrl"
+                           placeholder="dataUrl">
                 </div>
             </div>
             <div class="modal-footer">

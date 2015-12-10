@@ -4,34 +4,23 @@ var ini = require("ini");
 var path = require('path');
 var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
-var gui = require('nw.gui');
-var win = gui.Window.get();
-//var TTS = require('./resources/libs/libokvtts');
-//win.on('close', function() {
-//    TTS.libokvtts.OKVUnInit.async(null,function (err,res) {
-//        if(res == 0){
-//            this.hide();
-//        }
-//    })
-//});
 
 var logger = require('./resources/libs/logger').getLogger('config.js');
 var utils = require('./resources/libs/utils');
 var SDK = require('./resources/libs/play');
 
-global.dataUrl = "http://127.0.0.1:3001/Speech";//发布地址
-
 var config = {
     $speed: $("#soundModal input[name=speed]"),
     $volume: $("#soundModal input[name=volume]"),
-    $timbre: $("#soundModal input[name=timbre]"),
+    $timbre: $("#soundModal select[name=timbre]"),
     $taskNumber: $("#playModal input[name=taskNumber]"),
     $aheadTime: $("#playModal input[name=aheadTime]"),
     $rulePlay: $("#playModal input[name=rulePlay]"),
     $updateTime: $("#getDataModal input[name=updateTime]"),
     $user: $("#loginModal input[name=user]"),
     $password: $("#loginModal input[name=password]"),
-    $dataUrl: $("#configureModal input[name=dataUrl]")
+    $dataUrl: $("#configureModal input[name=dataUrl]"),
+    $loginUrl:$("#configureModal input[name=loginUrl]")
 };
 
 var viewConfig = function () {
@@ -48,8 +37,10 @@ var viewConfig = function () {
             config.$user.val(data.login.user);
             config.$password.val(data.login.password);
             config.$dataUrl.val(data.urlConfig.dataUrl);
+            config.$loginUrl.val(data.urlConfig.loginUrl);
 
             global.dataUrl = data.urlConfig.dataUrl;
+            global.loginUrl = data.urlConfig.loginUrl;
         } else {
             fs.createWriteStream(nwDir + '/config.ini', {start: 0, flags: "w", encoding: "utf8"});
             var c = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
@@ -61,7 +52,6 @@ var viewConfig = function () {
 
 var saveSoundConfig = function () {
     $("#saveSoundConfig").click(function () {
-        console.info(config.$speed.val());
         var speed = config.$speed.val();
         var volume = config.$volume.val();
         var timbre = config.$timbre.val();
@@ -69,9 +59,21 @@ var saveSoundConfig = function () {
         if (s.sound == undefined) {
             s.sound = {};
         }
-        SDK.speechConfig(s.sound, function (res) {
-            console.info(res);
-        });
+        if(s.sound.speed != speed){
+            SDK.speechConfig(s.sound.speed, function (data) {
+                logger.info(data);
+            });
+        }
+        if(s.sound.volume != volume){
+            SDK.volumeConfig(s.sound.volume, function (data) {
+                logger.info(data);
+            });
+        }
+        if(s.sound.timbre != timbre){
+            SDK.timbreConfig(s.sound.timbre, function (data) {
+                logger.info(data);
+            });
+        }
         s.sound.speed = speed;
         s.sound.volume = volume;
         s.sound.timbre = timbre;
@@ -117,16 +119,21 @@ var saveGetDataConfig = function () {
 var saveConfigureConfig = function () {
     $("#saveConfigureConfig").click(function () {
         var dataUrl = config.$dataUrl.val();
+        var loginUrl = config.$loginUrl.val();
         var l = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (l.urlConfig == undefined) {
             l.urlConfig = {};
         }
-        var oldDataUrl = l.urlConfig.dataUrl;
-        l.urlConfig.dataUrl = dataUrl;
-        fs.writeFileSync(nwDir + "/config.ini", ini.stringify(l), {start: 0, flags: "w", encoding: "utf8"});
-        if (oldDataUrl != dataUrl) {
+        if (l.urlConfig.dataUrl != dataUrl) {
             global.dataUrl = dataUrl;
         }
+        if (l.urlConfig.loginUrl != loginUrl) {
+            global.loginUrl = loginUrl;
+        }
+        l.urlConfig.dataUrl = dataUrl;
+        l.urlConfig.loginUrl = loginUrl;
+        fs.writeFileSync(nwDir + "/config.ini", ini.stringify(l), {start: 0, flags: "w", encoding: "utf8"});
+
     });
 };
 

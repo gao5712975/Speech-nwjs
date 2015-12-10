@@ -122,7 +122,7 @@ var viewTableFun = {
         return $("#" + id);
     },
     viewSpeechStr: function (data) {
-        var select = "<div class='btn-group'><button type='button' class='btn btn-success' onclick=\"singlePlay(\'" + data.id + "\')\">播放</button> <button type='button' class='btn btn-info'onclick=\"modifySpeech(\'" + data.id + "\')\">修改</button> <button type='button' class='btn btn-warning'onclick=\"deleteSpeech(\'" + data.id + "\')\">删除</button></div>";
+        var select = "<div class='btn-group'><button type='button' data-loading-text='播放' class='btn btn-success' onclick=\"singlePlay(\'" + data.id + "\')\">播放</button> <button type='button' class='btn btn-info'onclick=\"modifySpeech(\'" + data.id + "\')\">修改</button> <button type='button' class='btn btn-warning'onclick=\"deleteSpeech(\'" + data.id + "\')\">删除</button></div>";
         var str = "<tr class='text-center' data-json='" + JSON.stringify(data) + "' id='" + data.id + "'><td>" + data.title + "</td><td>" + data.content + "</td><td> " + select + " </td></tr>";
         return str;
     }

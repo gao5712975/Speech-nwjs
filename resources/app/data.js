@@ -19,11 +19,7 @@ global.carData = [];
 var time;
 var getDate = function () {
     $("#getData").click(function () {
-        var dataUrl = $("#configureModal input[name=dataUrl]").val();
-        if(dataUrl != '' && dataUrl != undefined && dataUrl != global.dataUrl){
-            global.dataUrl = dataUrl;
-        }
-        var optUrl = url.parse(global.dataUrl+"/admin/findDataList.do");
+        var optUrl = url.parse(global.dataUrl);
         optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
         optUrl.method = "post";
 

@@ -38,9 +38,10 @@ var play = function () {
                     saveCarBusId(id);
                     recoveryPlay();
                     $("#" + id).attr("class", "text-center");
-                } else if (d.status == 2) {
+                } else if (d.status == 3) {
                     recoveryPlay();
                 } else {
+                    utils.alertModal("系统错误");//系统错误
                     $("#play").button("reset");
                     $("#" + id).attr("class", "text-center");
                 }
@@ -56,8 +57,10 @@ var play = function () {
 var stop = function () {
     $("#stop,#speechStop").click(function () {
         SDK.stop(function (d) {
-            if (d.status == 1) {
+            if (d.status == 0) {
                 global.statusPlay = 0;
+            }else{
+                utils.alertModal("系统错误");//系统错误
             }
             $("#play").button("reset");
             $("#speechJob").button("reset");
@@ -76,10 +79,12 @@ var speechPlay = function () {
     $("#speechPlay").click(function () {
         $("#speechPlay").button("loading");
         SDK.speechPlay({speech: $("input[name=speech]").val(), taskNumber: 1}, function (data) {
+            console.info(data);
             if (data.status == 0) {
                 recoveryPlay();
+            }else{
+                utils.alertModal("系统错误");//系统错误
             }
-            console.info(data.status);
             $("#speechPlay").button("reset");
         })
     })
@@ -120,6 +125,9 @@ var speechJob = function () {
                         dataSpeech = undefined;
                         $("#speechJob").button("reset");
                     }
+                }else{
+                    utils.alertModal("系统错误");//系统错误
+                    $("#speechJob").button("reset");
                 }
             }
         });
@@ -151,7 +159,7 @@ var saveCarBusId = function (id) {
 /*车次列表立即播报*/
 function singleCarListPlay(id) {
     $("#" + id).attr("class", "success text-center");
-    $("#" + id).find("button[class='btn btn-success singleCarList']").button("loading");
+    $("#" + id).find("button:contains('立即播放')").button("loading");
     var json = $("#" + id).attr("data-json");
     json = JSON.parse(json);
     var number = json.number;
@@ -168,8 +176,10 @@ function singleCarListPlay(id) {
             }
             saveCarBusId(id);
             recoveryPlay();
+        }else{
+            utils.alertModal("系统错误");//系统错误
         }
-        $("#" + id).find("button[class='btn btn-success singleCarList disabled']").button("reset");
+        $("#" + id).find("button:contains('立即播放')").button("reset");
         $("#" + id).attr("class", "text-center");
     });
 }
@@ -177,12 +187,14 @@ function singleCarListPlay(id) {
 /*自定义任务单个播报singlePlay*/
 function singlePlay(id) {
     var data = JSON.parse($("#" + id).attr("data-json")).content;
-    $("#" + id).attr("class", "success text-center");
+    $("#" + id).attr("class", "success text-center").find("button:contains('播放')").button("loading");
     SDK.speechPlay({speech: data, taskNumber: 1}, function (data) {
         if (data.status == 0) {
-
+            recoveryPlay();
+        }else{
+            utils.alertModal("系统错误");//系统错误
         }
+        $("#" + id).attr("class", "text-center");
+        $("#" + id).find("button:contains('播放')").button("reset");
     });
-    $("#" + id).attr("class", "text-center");
-    recoveryPlay();
 }
