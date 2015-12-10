@@ -20,7 +20,7 @@ var config = {
     $user: $("#loginModal input[name=user]"),
     $password: $("#loginModal input[name=password]"),
     $dataUrl: $("#configureModal input[name=dataUrl]"),
-    $loginUrl:$("#configureModal input[name=loginUrl]")
+    $loginUrl: $("#configureModal input[name=loginUrl]")
 };
 
 var viewConfig = function () {
@@ -38,14 +38,24 @@ var viewConfig = function () {
             config.$password.val(data.login.password);
             config.$dataUrl.val(data.urlConfig.dataUrl);
             config.$loginUrl.val(data.urlConfig.loginUrl);
-
             global.dataUrl = data.urlConfig.dataUrl;
             global.loginUrl = data.urlConfig.loginUrl;
         } else {
-            fs.createWriteStream(nwDir + '/config.ini', {start: 0, flags: "w", encoding: "utf8"});
-            var c = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
+            var c = {};
             c.scope = "local";
-            fs.writeFileSync(nwDir + "/config.ini", ini.stringify(c));
+            c.sound = {};
+            c.sound.speed = "";c.sound.volume = "";c.sound.timbre = "";
+            c.play = {};
+            c.play.taskNumber = "";c.play.aheadTime = "";c.play.rulePlay = "";
+            c.updateData = {};
+            c.updateData.updateTime = "";
+            c.login = {};
+            c.login.user = "";c.login.password = "";
+            c.urlConfig = {};
+            c.urlConfig.dataUrl = "";c.urlConfig.loginUrl = "";
+            fs.writeFile(nwDir + '/config.ini', ini.stringify(c), function (err) {
+                if (err) throw err;
+            });
         }
     })
 };
@@ -59,17 +69,17 @@ var saveSoundConfig = function () {
         if (s.sound == undefined) {
             s.sound = {};
         }
-        if(s.sound.speed != speed){
+        if (s.sound.speed != speed) {
             SDK.speechConfig(s.sound.speed, function (data) {
                 logger.info(data);
             });
         }
-        if(s.sound.volume != volume){
+        if (s.sound.volume != volume) {
             SDK.volumeConfig(s.sound.volume, function (data) {
                 logger.info(data);
             });
         }
-        if(s.sound.timbre != timbre){
+        if (s.sound.timbre != timbre) {
             SDK.timbreConfig(s.sound.timbre, function (data) {
                 logger.info(data);
             });

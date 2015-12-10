@@ -5,7 +5,7 @@
   "window": {
     "icon": "favicon.png",
     "title": "语音播报",
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "width": 1000,
     "height": 585,
@@ -29,7 +29,6 @@
     "node-uuid": "^1.4.3",
     "serve-favicon": "~2.3.0",
     "Log4js": "~0.6.27",
-    "crypto": "latest",
-    "node-uuid": "latest"
+    "crypto": "latest"
   }
 }

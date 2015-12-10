@@ -79,7 +79,6 @@ var speechPlay = function () {
     $("#speechPlay").click(function () {
         $("#speechPlay").button("loading");
         SDK.speechPlay({speech: $("input[name=speech]").val(), taskNumber: 1}, function (data) {
-            console.info(data);
             if (data.status == 0) {
                 recoveryPlay();
             }else{
@@ -103,34 +102,38 @@ var recoveryPlay = function () {
 var dataSpeech = undefined;
 var speechJob = function () {
     $("#speechJob").click(function () {
-        if (dataSpeech == undefined) {
-            if ($("#speechList").children("tr[class='success text-center']").length > 0) {
-                dataSpeech = $("#speechList").children("tr[class='success text-center']");
-            } else {
-                dataSpeech = $("#speechList").children("tr:first");
-            }
-        }
-        var data = dataSpeech.attr("data-json");
-        $("#speechJob").button("loading");
-        dataSpeech.attr("class", "success text-center");
-        SDK.speechPlay({speech: JSON.parse(data).content, taskNumber: '1'}, function (dat) {
-            if (dataSpeech != undefined) {
-                if (dat.status == 0) {
-                    dataSpeech.attr("class", "text-center");
-                    dataSpeech = dataSpeech.next("tr");
-                    if (dataSpeech.attr("data-json") != undefined) {
-                        $("#speechJob").trigger("click");
-                    } else {
-                        recoveryPlay();
-                        dataSpeech = undefined;
-                        $("#speechJob").button("reset");
-                    }
-                }else{
-                    utils.alertModal("系统错误");//系统错误
-                    $("#speechJob").button("reset");
+        if($("#speechList").children("tr").length > 0){
+            if (dataSpeech == undefined) {
+                if ($("#speechList").children("tr[class='success text-center']").length > 0) {
+                    dataSpeech = $("#speechList").children("tr[class='success text-center']");
+                } else {
+                    dataSpeech = $("#speechList").children("tr:first");
                 }
             }
-        });
+            var data = dataSpeech.attr("data-json");
+            $("#speechJob").button("loading");
+            dataSpeech.attr("class", "success text-center");
+            SDK.speechPlay({speech: JSON.parse(data).content, taskNumber: 1}, function (dat) {
+                if (dataSpeech != undefined) {
+                    if (dat.status == 0) {
+                        dataSpeech.attr("class", "text-center");
+                        dataSpeech = dataSpeech.next("tr");
+                        if (dataSpeech.attr("data-json") != undefined) {
+                            $("#speechJob").trigger("click");
+                        } else {
+                            recoveryPlay();
+                            dataSpeech = undefined;
+                            $("#speechJob").button("reset");
+                        }
+                    }else{
+                        utils.alertModal("系统错误");//系统错误
+                        $("#speechJob").button("reset");
+                    }
+                }
+            });
+        }else {
+            utils.alertModal("请添加任务");
+        }
     })
 };
 

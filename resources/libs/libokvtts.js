@@ -48,6 +48,7 @@ var OKVPlay = function (play_text, num, callback) {
         }else if(res == 2){
             callback({status:res});
         }else{
+            status_play = 0;
             callback({status:res});
         }
     });

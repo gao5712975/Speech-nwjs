@@ -90,11 +90,13 @@ var updateTime;
 var autoGetData = function () {
     clearInterval(updateTime);
     var time = $("#getDataModal input[name=updateTime]").val();
-    var intervalTime = parseInt(time) * 1000 * 60;
-    /*每过一段时间跟新数据*/
-    updateTime = setInterval(function () {
-        $("#getData").trigger("click");
-    }, intervalTime);
+    if(time.match(/^[0-9]+$/)){
+        var intervalTime = parseInt(time) * 1000 * 60;
+        /*每过一段时间跟新数据*/
+        updateTime = setInterval(function () {
+            $("#getData").trigger("click");
+        }, intervalTime);
+    }
 };
 
 var saveSpeech = function () {
@@ -106,19 +108,25 @@ var saveSpeech = function () {
         var key = uuid.v1().replace(/\-/g, "");
         fs.exists(nwDir + '/tempJob.ini', function (exists) {
             if (!exists) {
-                fs.createWriteStream(nwDir + '/tempJob.ini', {start: 0, flags: "w", encoding: "utf8"});
-                var c = ini.parse(fs.readFileSync(nwDir + "/tempJob.ini", "utf8"));
-                c.scope = "local";
-                fs.writeFileSync(nwDir + "/tempJob.ini", ini.stringify(c));
+                var cc = {};
+                cc.scope = "local";
+                cc.content = {};
+                data.id = key;
+                cc.content[key] = data;
+                fs.writeFile(nwDir + '/tempJob.ini',ini.stringify(cc), function (err) {
+                    if (err) throw err;
+                    $("#speechList").append(utils.viewTableFun.viewSpeechStr(data));
+                });
+            }else{
+                var sp = ini.parse(fs.readFileSync(nwDir + "/tempJob.ini", "utf8"));
+                if (sp.content == undefined) {
+                    sp.content = {};
+                }
+                data.id = key;
+                sp.content[key] = data;
+                fs.writeFileSync(nwDir + "/tempJob.ini", ini.stringify(sp), {start: 0, flags: "w", encoding: "utf8"});
+                $("#speechList").append(utils.viewTableFun.viewSpeechStr(data));
             }
-            var sp = ini.parse(fs.readFileSync(nwDir + "/tempJob.ini", "utf8"));
-            if (sp.content == undefined) {
-                sp.content = {};
-            }
-            data.id = key;
-            sp.content[key] = data;
-            fs.writeFileSync(nwDir + "/tempJob.ini", ini.stringify(sp), {start: 0, flags: "w", encoding: "utf8"});
-            $("#speechList").append(utils.viewTableFun.viewSpeechStr(data));
         });
     })
 };
