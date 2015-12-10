@@ -227,7 +227,7 @@ function singlePlay(id) {
     SDK.speechPlay({speech: data, taskNumber: 1}, function (data) {
         if (data.status == 0) {
             recoveryPlay();
-        }else{
+        }else if(data.status == 2){
             utils.alertModal("系统错误");//系统错误
         }
         $("#" + id).attr("class", "text-center");
