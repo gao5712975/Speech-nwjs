@@ -77,9 +77,7 @@ var login = function () {
 };
 
 var init = function(){
-    setTimeout(function () {
-        $("[data-target=#loginModal]").trigger("click");
-    }, 250);
+    $("[data-target=#loginModal]").trigger("click");
     login();
 };
 

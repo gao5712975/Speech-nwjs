@@ -53,13 +53,43 @@ var play = function () {
     })
 };
 
+/**
+ * 1-单次播放,2-单曲循环,3-列表播放,4-列表循环,5-随机播放
+ */
+/*var jobPlay = function () {
+    $("#jobPlay").click(function () {
+        if($("#speechList >tr").length > 0){
+            var playMode = $("#playMode").attr("data-value");
+            var sum = $("#speechList >tr").length;
+            var i = 0;
+            var json = $("#jobPlay").children("tr:eq("+i+")").attr("data-json");
+        }
+    })
+};
+
+function playMode(playMode,index,sum){
+    switch (playMode){
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        default:break;
+    }
+}*/
+
 /*------------stop-----------*/
 var stop = function () {
     $("#stop,#speechStop").click(function () {
         SDK.stop(function (d) {
             if (d.status == 0) {
                 global.statusPlay = 0;
-            }else{
+            }else if(d.status == 2){
                 utils.alertModal("系统错误");//系统错误
             }
             $("#play").button("reset");
@@ -81,7 +111,7 @@ var speechPlay = function () {
         SDK.speechPlay({speech: $("input[name=speech]").val(), taskNumber: 1}, function (data) {
             if (data.status == 0) {
                 recoveryPlay();
-            }else{
+            }else if(data.status == 2){
                 utils.alertModal("系统错误");//系统错误
             }
             $("#speechPlay").button("reset");
@@ -99,43 +129,46 @@ var recoveryPlay = function () {
 };
 
 /*dataSpeech 自定义播报任务 标记位*/
-var dataSpeech = undefined;
-var speechJob = function () {
-    $("#speechJob").click(function () {
-        if($("#speechList").children("tr").length > 0){
-            if (dataSpeech == undefined) {
-                if ($("#speechList").children("tr[class='success text-center']").length > 0) {
-                    dataSpeech = $("#speechList").children("tr[class='success text-center']");
-                } else {
-                    dataSpeech = $("#speechList").children("tr:first");
-                }
-            }
-            var data = dataSpeech.attr("data-json");
-            $("#speechJob").button("loading");
-            dataSpeech.attr("class", "success text-center");
-            SDK.speechPlay({speech: JSON.parse(data).content, taskNumber: 1}, function (dat) {
-                if (dataSpeech != undefined) {
-                    if (dat.status == 0) {
-                        dataSpeech.attr("class", "text-center");
-                        dataSpeech = dataSpeech.next("tr");
-                        if (dataSpeech.attr("data-json") != undefined) {
-                            $("#speechJob").trigger("click");
-                        } else {
-                            recoveryPlay();
-                            dataSpeech = undefined;
-                            $("#speechJob").button("reset");
-                        }
-                    }else{
-                        utils.alertModal("系统错误");//系统错误
-                        $("#speechJob").button("reset");
-                    }
-                }
-            });
-        }else {
-            utils.alertModal("请添加任务");
-        }
-    })
-};
+//var dataSpeech = undefined;
+//var speechJob = function () {
+//    $("#speechJob").click(function () {
+//        if($("#speechList").children("tr").length > 0){
+//            if (dataSpeech == undefined) {
+//                if ($("#speechList").children("tr[class='success text-center']").length > 0) {
+//                    dataSpeech = $("#speechList").children("tr[class='success text-center']");
+//                } else {
+//                    dataSpeech = $("#speechList").children("tr:first");
+//                }
+//            }
+//            var data = dataSpeech.attr("data-json");
+//            $("#speechJob").button("loading");
+//            dataSpeech.attr("class", "success text-center");
+//            SDK.speechPlay({speech: JSON.parse(data).content, taskNumber: 1}, function (dat) {
+//                if (dataSpeech != undefined) {
+//                    if (dat.status == 0) {
+//                        dataSpeech.attr("class", "text-center");
+//                        dataSpeech = dataSpeech.next("tr");
+//                        if (dataSpeech.attr("data-json") != undefined) {
+//                            $("#speechJob").trigger("click");
+//                        } else {
+//                            recoveryPlay();
+//                            dataSpeech = undefined;
+//                            $("#speechJob").button("reset");
+//                        }
+//                    }else if(dat.status == 2){
+//                        utils.alertModal("系统错误");//系统错误
+//                        $("#speechJob").button("reset");
+//                    }else if(dat.status == -1){
+//                        $("#speechJob").button("reset");
+//                        return false;
+//                    }
+//                }
+//            });
+//        }else {
+//            utils.alertModal("请添加任务");
+//        }
+//    })
+//};
 
 var init = function () {
     /*任务播报*/
@@ -144,8 +177,8 @@ var init = function () {
     stop();
     /*插播*/
     speechPlay();
-    /*自定义任务*/
-    speechJob();
+    ///*自定义任务*/
+    //speechJob();
 };
 
 init();

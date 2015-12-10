@@ -7,7 +7,7 @@ var path = require('path');
 var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
 {
-    var libokvtts = ffi.Library(nwDir+'\\libokvtts.dll', {
+    var libokvtts = ffi.Library(nwDir + '\\libokvtts.dll', {
         'OKVGetLangMode': ['int', []],
         'OKVGetSpeed': ['int', []],
         'OKVGetSupportLang': ['int', []],
@@ -21,9 +21,9 @@ var nwDir = path.dirname(nwPath);
         'OKVUnInit': ['int', ['void']]
     });
     var init = libokvtts.OKVInit(nwDir);
-    if(init == 0){
+    if (init == 0) {
         console.info("初始化成功!!!");
-    }else{
+    } else {
         console.info("初始化失败/(ㄒoㄒ)/~~");
     }
 }
@@ -41,15 +41,15 @@ var OKVPlay = function (play_text, num, callback) {
         if (res == 0 && status_play == 0) {
             if (--num == 0) {
                 status_play = 0;
-                callback({status:res});
+                callback({status: res});
             } else {
-                return OKVPlay(play_text, num,callback);
+                return OKVPlay(play_text, num, callback);
             }
-        }else if(res == 2){
-            callback({status:res});
-        }else{
+        } else if (res == 2) {
+            callback({status: res});
+        } else {
             status_play = 0;
-            callback({status:res});
+            callback({status: -1});
         }
     });
 };
@@ -61,11 +61,11 @@ var OKVPlay = function (play_text, num, callback) {
  */
 var OKVStop = function (callback) {
     libokvtts.OKVStop.async(function (err, res) {
-        if(res == 0){
+        if (res == 0) {
             status_play = 1;
-            callback({status:res});
-        }else if(res == 2){
-            callback({status:res});
+            callback({status: res});
+        } else if (res == 2) {
+            callback({status: res});
         }
     });
 };
@@ -77,11 +77,11 @@ var OKVStop = function (callback) {
  * @constructor
  */
 var OKVSetLangMode = function (langMode, callback) {
-    libokvtts.OKVSetLangMode.async(langMode,function (err, res) {
-        if(res == 0){
-            callback({status:res});
-        }else if(res == 2){
-            callback({status:res});
+    libokvtts.OKVSetLangMode.async(langMode, function (err, res) {
+        if (res == 0) {
+            callback({status: res});
+        } else if (res == 2) {
+            callback({status: res});
         }
     });
 };
@@ -93,11 +93,11 @@ var OKVSetLangMode = function (langMode, callback) {
  * @constructor
  */
 var OKVSetSpeed = function (speed, callback) {
-    libokvtts.OKVSetSpeed.async(speed,function (err, res) {
-        if(res == 0){
-            callback({status:res});
-        }else if(res == 2){
-            callback({status:res});
+    libokvtts.OKVSetSpeed.async(speed, function (err, res) {
+        if (res == 0) {
+            callback({status: res});
+        } else if (res == 2) {
+            callback({status: res});
         }
     });
 };
@@ -109,22 +109,22 @@ var OKVSetSpeed = function (speed, callback) {
  * @constructor
  */
 var OKVSetVolume = function (volume, callback) {
-    libokvtts.OKVSetVolume.async(volume,function (err, res) {
-        if(res == 0){
-            callback({status:res});
-        }else if(res == 2){
-            callback({status:res});
+    libokvtts.OKVSetVolume.async(volume, function (err, res) {
+        if (res == 0) {
+            callback({status: res});
+        } else if (res == 2) {
+            callback({status: res});
         }
     });
 };
 
 module.exports = {
     libokvtts: libokvtts,
-    OKVSetVolume:OKVSetVolume,
-    OKVSetSpeed:OKVSetSpeed,
-    OKVSetLangMode:OKVSetLangMode,
-    OKVStop:OKVStop,
-    OKVPlay:OKVPlay
+    OKVSetVolume: OKVSetVolume,
+    OKVSetSpeed: OKVSetSpeed,
+    OKVSetLangMode: OKVSetLangMode,
+    OKVStop: OKVStop,
+    OKVPlay: OKVPlay
 };
 
 

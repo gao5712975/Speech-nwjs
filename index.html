@@ -73,7 +73,7 @@
     <div id="myTabContent" class="tab-content">
         <div role="tabpanel" class="tab-pane fade in active" id="home" aria-labelledby="home-tab">
             <div class="navbar-form navbar-right" role="search">
-                <button play-type="01" data-loading-text="播放" type="button" id="play"
+                <button data-loading-text="播放" type="button" id="play"
                         class="btn btn-success">播放
                 </button>
                 <button type="button" id="stop" class="btn btn-warning">停止</button>
@@ -116,25 +116,26 @@
         <div role="tabpanel" class="tab-pane fade" id="profile" aria-labelledby="profile-tab">
             <!--插播start-->
             <div class="row" style="padding: 1em">
-                <div class="col-lg-6 form-inline">
+                <div class="col-lg-6">
                     <div class="input-group">
                         <input type="text" name="speech" class="form-control" placeholder="请输入">
                         <span class="input-group-btn">
-                        <button play-type="02" data-loading-text="插播" class="btn btn-default"
-                                id="speechPlay" type="button">
-                            插播
-                        </button>
-                        <button play-type="03" type="button" data-loading-text="全部播放" id="speechJob"
-                                class="btn btn-success">全部播放
+                        <button data-loading-text="插播"
+                                class="btn btn-default" id="speechPlay" type="button">插播
                         </button>
                         <button type="button" id="speechStop" class="btn btn-warning">停止</button>
                         <button type="button" id="addSpeech" class="btn btn-success" data-toggle="modal"
                                 data-target="#addSpeechModal">添加
                         </button>
+                        <!--<button type="button" id="playMode" data-play="单次播放,单曲循环,列表播放,列表循环,随机播放" data-value="1"
+                                class="btn btn-default">单次播放
+                        </button>
+                        <button data-loading-text="播放" class="btn btn-info" id="jobPlay" type="button">播放</button>-->
                         </span>
                     </div>
                 </div>
             </div>
+
             <!--end-->
             <!--任务列表start-->
             <table class="table table-hover table-bordered table-responsive">
@@ -370,11 +371,13 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="exampleInputUpdateTime">定时更新</label>
+
                     <div class="input-group">
                         <input type="text" min="1" class="form-control" name="updateTime" id="exampleInputUpdateTime"
                                placeholder="updateTime" onkeyup="this.value=this.value.replace(/\D/g,'')"
                                onafterpaste="this.value=this.value.replace(/\D/g,'')"
                                value="30">
+
                         <div class="input-group-addon">分钟</div>
                     </div>
                 </div>
@@ -445,5 +448,18 @@
 <script src="./resources/app/login.js"></script>
 <script src="./resources/app/data.js"></script>
 <script src="./resources/app/speech.js"></script>
+<!--<script>
+    $(function () {
+        $("#playMode").click(function () {
+            var index = $(this).attr("data-value");
+            var arr = $(this).attr("data-play").split(",");
+            if (arr.length == +index) {
+                index = 0;
+            }
+            $(this).text(arr[+index]);
+            $(this).attr("data-value", ++index);
+        })
+    })
+</script>-->
 </body>
 </html>
