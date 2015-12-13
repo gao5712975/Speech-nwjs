@@ -6,28 +6,39 @@ var ffi = require('ffi');
 var path = require('path');
 var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
-{
-    var libokvtts = ffi.Library(nwDir + '\\libokvtts.dll', {
-        'OKVGetLangMode': ['int', []],
-        'OKVGetSpeed': ['int', []],
-        'OKVGetSupportLang': ['int', []],
-        'OKVGetVolume': ['int', []],
-        'OKVInit': ['int', ['string']],
-        'OKVPlay': ['int', ['string']],
-        'OKVSetLangMode': ['int', ['int']],
-        'OKVSetSpeed': ['int', ['int']],
-        'OKVSetVolume': ['int', ['int']],
-        'OKVStop': ['int', []],
-        'OKVUnInit': ['int', ['void']]
-    });
-    var init = libokvtts.OKVInit(nwDir);
-    if (init == 0) {
-        console.info("初始化成功!!!");
-    } else {
-        console.info("初始化失败/(ㄒoㄒ)/~~");
+var iconv = require('iconv-lite');
+
+var libokvtts = ffi.Library(nwDir + '\\libokvtts.dll', {
+    'OKVGetLangMode': ['int', []],
+    'OKVGetSpeed': ['int', []],
+    'OKVGetSupportLang': ['int', []],
+    'OKVGetVolume': ['int', []],
+    'OKVInit': ['int', ['string']],
+    'OKVPlay': ['int', ['string']],
+    'OKVSetLangMode': ['int', ['int']],
+    'OKVSetSpeed': ['int', ['int']],
+    'OKVSetVolume': ['int', ['int']],
+    'OKVStop': ['int', []],
+    'OKVUnInit': ['int', ['void']]
+});
+var init = libokvtts.OKVInit(nwDir);
+if (init == 0) {
+    console.info("初始化成功!!!");
+} else {
+    console.info("初始化失败/(ㄒoㄒ)/~~");
+}
+
+var status = 0;// 0：播报完成且不是中途中断。1：不管是否播报，都认为是被中断播报。2：系统错误，动态库加载失败。3：手动停止后的状态。
+
+function copyObj(oldObj, newObj) {
+    for (var k in oldObj) {
+        if (oldObj.hasOwnProperty(k)) {
+            if (newObj[k] == undefined) {
+                newObj[k] = oldObj[k];
+            }
+        }
     }
 }
-var status_play = 0; //初始状态0，停止后返回赋值1，播放完成后赋值0；
 
 /**
  * 播放功能
@@ -36,20 +47,42 @@ var status_play = 0; //初始状态0，停止后返回赋值1，播放完成后�
  * @param callback 状态返回
  * @constructor
  */
-var OKVPlay = function (play_text, num, callback) {
-    libokvtts.OKVPlay.async(play_text, function (err, res) {
-        if (res == 0 && status_play == 0) {
+
+var array = [];
+var OKVPlay = function (play_text,num, callback) {
+    play_text = iconv.encode(play_text,'GBK');
+    var libokv = {};
+    copyObj(libokvtts, libokv);
+    array.unshift(libokv);
+    libokv.OKVPlay.async(play_text, function (err, res) {
+        if(array.length > 1){
+            status = 1;
+        }else{
+            if(status != 3){//如果点击停止按钮就不把状态改为0；
+                status = 0;
+            }
+        }
+        if (res == 0 && status != 3) {
             if (--num == 0) {
-                status_play = 0;
-                callback({status: res});
+            array.pop();
+            callback({status: status});
+            status = 0;
             } else {
-                return OKVPlay(play_text, num, callback);
+                if(array.length > 1) {
+                    array.pop();
+                    callback({status: status});
+                }else{
+                    array.pop();
+                    return OKVPlay(play_text, num, callback);
+                }
             }
         } else if (res == 2) {
+            array.pop();
             callback({status: res});
         } else {
-            status_play = 0;
-            callback({status: -1});
+            array.pop();
+            callback({status: 1});
+            status = 0;
         }
     });
 };
@@ -60,12 +93,12 @@ var OKVPlay = function (play_text, num, callback) {
  * @constructor
  */
 var OKVStop = function (callback) {
+    status = 3;
     libokvtts.OKVStop.async(function (err, res) {
         if (res == 0) {
-            status_play = 1;
-            callback({status: res});
+            callback({status: 3});
         } else if (res == 2) {
-            callback({status: res});
+            callback({status: 2});
         }
     });
 };

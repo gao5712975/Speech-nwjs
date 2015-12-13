@@ -4,6 +4,7 @@
 'use strict';
 var url = require("url");
 var http = require("http");
+var querystring = require("querystring");
 var uuid = require('node-uuid');
 var fs = require('fs');
 var ini = require("ini");
@@ -53,11 +54,11 @@ var getDate = function () {
                     utils.alertModal("系统错误");//系统错误
                 }
             }).on("error", function (e) {
-                logger.error("getDate"+e.message);
+                logger.error("getDate" + e.message);
             });
         });
         manage.on('error', function (e) {
-            logger.error("getDate"+e.message);
+            logger.error("getDate" + e.message);
             utils.alertModal("服务连接失败");//系统错误
         });
         manage.write(querystring.stringify({id: global.company_id}));
@@ -76,7 +77,7 @@ var saveCarListNumber = function () {
         var taskNumber = $("#modifyCarListViewModal input[name=taskNumber]").val();
         data.number = parseInt(taskNumber);
 
-        global.taskModifyArray.unshift({id:data.id,number:data.number});
+        global.taskModifyArray.unshift({id: data.id, number: data.number});
         if (global.taskModifyArray.length >= 1000) {
             global.taskModifyArray.pop();
         }
@@ -90,7 +91,7 @@ var updateTime;
 var autoGetData = function () {
     clearInterval(updateTime);
     var time = $("#getDataModal input[name=updateTime]").val();
-    if(time.match(/^[0-9]+$/)){
+    if (time.match(/^[0-9]+$/)) {
         var intervalTime = parseInt(time) * 1000 * 60;
         /*每过一段时间跟新数据*/
         updateTime = setInterval(function () {
@@ -113,11 +114,11 @@ var saveSpeech = function () {
                 cc.content = {};
                 data.id = key;
                 cc.content[key] = data;
-                fs.writeFile(nwDir + '/tempJob.ini',ini.stringify(cc), function (err) {
+                fs.writeFile(nwDir + '/tempJob.ini', ini.stringify(cc), function (err) {
                     if (err) throw err;
                     $("#speechList").append(utils.viewTableFun.viewSpeechStr(data));
                 });
-            }else{
+            } else {
                 var sp = ini.parse(fs.readFileSync(nwDir + "/tempJob.ini", "utf8"));
                 if (sp.content == undefined) {
                     sp.content = {};
@@ -160,6 +161,9 @@ var updateSpeech = function () {
                 fs.writeFileSync(nwDir + "/tempJob.ini", ini.stringify(sp), {start: 0, flags: "w", encoding: "utf8"});
                 $("#" + id).attr("data-json", JSON.stringify(data));
                 $("#" + id).children("td:eq(0)").html(data.title);
+                if(data.content.length >50){
+                    data.content = data.content.substring(0,50)+"...";
+                }
                 $("#" + id).children("td:eq(1)").html(data.content);
             }
         }

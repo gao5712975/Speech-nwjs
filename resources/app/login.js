@@ -70,6 +70,11 @@ var login = function () {
         manage.on('error', function (e) {
             logger.error("login"+e.message);
             utils.alertModal("服务连接失败");
+            fs.readFile(nwDir + "/data.ini","utf8", function (err,data) {
+                var d = JSON.parse(data);
+                global.carData = d;
+                utils.viewTable();
+            })
         });
         manage.write(querystring.stringify(data));
         manage.end();

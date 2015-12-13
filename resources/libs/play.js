@@ -16,7 +16,7 @@ var TTS = require('./libokvtts');
  * @param callback 返回状态码
  */
 var speechPlay = function (dataStr, callback) {
-    TTS.OKVPlay(dataStr.speech, dataStr.taskNumber, function (res) {
+    TTS.OKVPlay(dataStr.speech, dataStr.taskNumber,function (res) {
         callback(res);
     })
 };

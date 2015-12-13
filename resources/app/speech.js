@@ -25,6 +25,7 @@ var play = function () {
             var data = {speech: rulePlay, id: id, time: json.time, aheadTime: aheadTime, taskNumber: +number};
 
             $("#" + id).attr("class", "success text-center");
+            $("#" + id).find("button:contains('立即播放')").button("loading");
             $("#play").button("loading");
 
             SDK.play(data, function (d) {
@@ -37,13 +38,17 @@ var play = function () {
                     }
                     saveCarBusId(id);
                     recoveryPlay();
+                    $("#" + id).find("button:contains('立即播放')").button("reset");
                     $("#" + id).attr("class", "text-center");
                 } else if (d.status == 3) {
                     recoveryPlay();
-                } else {
+                } else if(d.status == 1){
+                    $("#" + id).find("button:contains('立即播放')").button("reset");
+                    $("#" + id).attr("class", "text-center");
+                }else{
                     utils.alertModal("系统错误");//系统错误
                     $("#play").button("reset");
-                    $("#" + id).attr("class", "text-center");
+                    return false;
                 }
             });
         } else {
@@ -53,43 +58,13 @@ var play = function () {
     })
 };
 
-/**
- * 1-单次播放,2-单曲循环,3-列表播放,4-列表循环,5-随机播放
- */
-/*var jobPlay = function () {
-    $("#jobPlay").click(function () {
-        if($("#speechList >tr").length > 0){
-            var playMode = $("#playMode").attr("data-value");
-            var sum = $("#speechList >tr").length;
-            var i = 0;
-            var json = $("#jobPlay").children("tr:eq("+i+")").attr("data-json");
-        }
-    })
-};
-
-function playMode(playMode,index,sum){
-    switch (playMode){
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            break;
-        default:break;
-    }
-}*/
-
 /*------------stop-----------*/
 var stop = function () {
     $("#stop,#speechStop").click(function () {
         SDK.stop(function (d) {
-            if (d.status == 0) {
+            if (d.status == 3) {
                 global.statusPlay = 0;
-            }else if(d.status == 2){
+            } else if (d.status == 2) {
                 utils.alertModal("系统错误");//系统错误
             }
             $("#play").button("reset");
@@ -109,12 +84,14 @@ var speechPlay = function () {
     $("#speechPlay").click(function () {
         $("#speechPlay").button("loading");
         SDK.speechPlay({speech: $("input[name=speech]").val(), taskNumber: 1}, function (data) {
+            $("#speechPlay").button("reset");
             if (data.status == 0) {
                 recoveryPlay();
-            }else if(data.status == 2){
+            } else if (data.status == 2) {
                 utils.alertModal("系统错误");//系统错误
+            }else{
+                return false;
             }
-            $("#speechPlay").button("reset");
         })
     })
 };
@@ -125,50 +102,10 @@ var speechPlay = function () {
 var recoveryPlay = function () {
     if (global.statusPlay == 1) {
         $("#play").trigger("click");
+    }else{
+        return false;
     }
 };
-
-/*dataSpeech 自定义播报任务 标记位*/
-//var dataSpeech = undefined;
-//var speechJob = function () {
-//    $("#speechJob").click(function () {
-//        if($("#speechList").children("tr").length > 0){
-//            if (dataSpeech == undefined) {
-//                if ($("#speechList").children("tr[class='success text-center']").length > 0) {
-//                    dataSpeech = $("#speechList").children("tr[class='success text-center']");
-//                } else {
-//                    dataSpeech = $("#speechList").children("tr:first");
-//                }
-//            }
-//            var data = dataSpeech.attr("data-json");
-//            $("#speechJob").button("loading");
-//            dataSpeech.attr("class", "success text-center");
-//            SDK.speechPlay({speech: JSON.parse(data).content, taskNumber: 1}, function (dat) {
-//                if (dataSpeech != undefined) {
-//                    if (dat.status == 0) {
-//                        dataSpeech.attr("class", "text-center");
-//                        dataSpeech = dataSpeech.next("tr");
-//                        if (dataSpeech.attr("data-json") != undefined) {
-//                            $("#speechJob").trigger("click");
-//                        } else {
-//                            recoveryPlay();
-//                            dataSpeech = undefined;
-//                            $("#speechJob").button("reset");
-//                        }
-//                    }else if(dat.status == 2){
-//                        utils.alertModal("系统错误");//系统错误
-//                        $("#speechJob").button("reset");
-//                    }else if(dat.status == -1){
-//                        $("#speechJob").button("reset");
-//                        return false;
-//                    }
-//                }
-//            });
-//        }else {
-//            utils.alertModal("请添加任务");
-//        }
-//    })
-//};
 
 var init = function () {
     /*任务播报*/
@@ -201,7 +138,9 @@ function singleCarListPlay(id) {
     var number = json.number;
     var rule = $("#playModal input[name=rulePlay]").val();
     var rulePlay = utils.rulePlay.rulePlayStr(json, rule);
-    SDK.speechPlay({speech: rulePlay, taskNumber: number, id: id}, function (data) {
+    SDK.speechPlay({speech: rulePlay, taskNumber: number}, function (data) {
+        $("#" + id).find("button:contains('立即播放')").button("reset");
+        $("#" + id).attr("class", "text-center");
         if (data.status == 0) {
             var historyList = $("#historyList");
             /*历史列表中不存在就插入否则就移除*/
@@ -212,25 +151,69 @@ function singleCarListPlay(id) {
             }
             saveCarBusId(id);
             recoveryPlay();
+        } else if (data.status == 1) {
+            return false;
         }else{
             utils.alertModal("系统错误");//系统错误
         }
-        $("#" + id).find("button:contains('立即播放')").button("reset");
-        $("#" + id).attr("class", "text-center");
     });
 }
 
+/**
+ * 1-单次播放,2-单曲循环,3-列表播放,4-列表循环,5-随机播放
+ */
 /*自定义任务单个播报singlePlay*/
 function singlePlay(id) {
     var data = JSON.parse($("#" + id).attr("data-json")).content;
     $("#" + id).attr("class", "success text-center").find("button:contains('播放')").button("loading");
     SDK.speechPlay({speech: data, taskNumber: 1}, function (data) {
-        if (data.status == 0) {
-            recoveryPlay();
-        }else if(data.status == 2){
-            utils.alertModal("系统错误");//系统错误
-        }
         $("#" + id).attr("class", "text-center");
         $("#" + id).find("button:contains('播放')").button("reset");
+        if (data.status == 0) {
+            var playMode = $("#playMode").attr("data-value");
+            var index = $("#" + id).attr("data-index");
+            var sum = $("#speechList >tr").length;
+            var result = playModeFun(+playMode, +index, +sum);
+            if (result != -1) {
+                $("#speechList").children("tr:eq(" + result + ")").find("button:contains('播放')").click();
+            }
+            //单次播放或列表播放最后一个才能有机会去恢复播报任务。
+            if(playMode == 1 || (playMode == 3 && index == $("#speechList > tr").length )){
+                recoveryPlay();
+            }
+        } else if (data.status == 2) {
+            utils.alertModal("系统错误");//系统错误
+        } else {
+            return true;
+        }
     });
+}
+
+function playModeFun(playMode, index, sum) {
+    switch (playMode) {
+        case 1:
+            return -1;
+        case 2:
+            return --index;
+        case 3:
+            if (index == sum) {
+                return -1;
+            } else {
+                return index;
+            }
+        case 4:
+            if (index == sum) {
+                return 0;
+            } else {
+                return index;
+            }
+        case 5:
+            var inn = parseInt(Math.random() * sum);
+            while (inn+1 == index) {
+                inn = parseInt(Math.random() * sum);
+            }
+            return inn;
+        default:
+            return -1;
+    }
 }

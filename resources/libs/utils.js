@@ -73,15 +73,15 @@ var viewTableFun = {
     appendCarList: function (json, id, cb) {
         var s = "";
         var number = $("#playModal input[name=taskNumber]").val();
-        if(+number === 0){
+        if (+number === 0) {
             number = 1;
         }
         $.each(json, function (index, obj) {
-            if(!obj.numberMo){
+            if (!obj.numberMo) {
                 obj.number = number;
             }
-            var select = "<button type='button'data-loading-text='立即播放' class='btn btn-success singleCarList' onclick=\"singleCarListPlay(\'" + obj.id + "\')\">立即播放</button> <button type='button' class='btn btn-info'onclick=\"modifyCarListView(\'" + obj.id + "\')\">修改</button>";
-            s += "<tr data-json=\'" + JSON.stringify(obj) + "\' id=\'" + obj.id + "\' class='text-center'><td>" + obj.time + "</td><td>" + obj.carNumber + "</td><td>" + obj.terminus + "</td><td>" + obj.carType + "</td><td>" + obj.platformNo + "</td><td>" +  obj.number + "</td><td>" + select + "</td></tr>";
+            var select = "<button type='button' data-loading-text='立即播放' class='btn btn-success singleCarList' onclick=\"singleCarListPlay(\'" + obj.id + "\')\">立即播放</button> <button type='button' class='btn btn-info'onclick=\"modifyCarListView(\'" + obj.id + "\')\">修改</button>";
+            s += "<tr data-json=\'" + JSON.stringify(obj) + "\' id=\'" + obj.id + "\' class='text-center'><td>" + obj.time + "</td><td>" + obj.carNumber + "</td><td>" + obj.terminus + "</td><td>" + obj.carType + "</td><td>" + obj.platformNo + "</td><td>" + obj.number + "</td><td>" + select + "</td></tr>";
         });
         setTimeout(function () {
             cb(id, s);
@@ -122,8 +122,13 @@ var viewTableFun = {
         return $("#" + id);
     },
     viewSpeechStr: function (data) {
+        var con = data.content;
+        if(data.content.length > 50){
+            con = data.content.substring(0,50)+"...";
+        }
+        var index = parseInt($("#speechList >tr").length) + 1;
         var select = "<div class='btn-group'><button type='button' data-loading-text='播放' class='btn btn-success' onclick=\"singlePlay(\'" + data.id + "\')\">播放</button> <button type='button' class='btn btn-info'onclick=\"modifySpeech(\'" + data.id + "\')\">修改</button> <button type='button' class='btn btn-warning'onclick=\"deleteSpeech(\'" + data.id + "\')\">删除</button></div>";
-        var str = "<tr class='text-center' data-json='" + JSON.stringify(data) + "' id='" + data.id + "'><td>" + data.title + "</td><td>" + data.content + "</td><td> " + select + " </td></tr>";
+        var str = "<tr class='text-center' data-index='" + index + "' data-json='" + JSON.stringify(data) + "' id='" + data.id + "'><td>" + data.title + "</td><td>" + con + "</td><td> " + select + " </td></tr>";
         return str;
     }
 };
@@ -168,5 +173,5 @@ module.exports = {
     alertModal: alertModal,
     rulePlay: rulePlay,
     viewTableFun: viewTableFun,
-    viewTable:viewTable
+    viewTable: viewTable
 };

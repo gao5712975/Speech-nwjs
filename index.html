@@ -13,14 +13,6 @@
     global.$ = window.$;</script>
     <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
     <script src="./resources/static/js/bootstrap.min.js"></script>
-    <script>
-        $(function () {
-            $('[data-toggle="popover"]').popover({
-                html: true,
-                animation: false
-            });
-        });
-    </script>
 </head>
 <body>
 <!--导航栏start  navbar-fixed-top Toggle navigation-->
@@ -127,10 +119,10 @@
                         <button type="button" id="addSpeech" class="btn btn-success" data-toggle="modal"
                                 data-target="#addSpeechModal">添加
                         </button>
-                        <!--<button type="button" id="playMode" data-play="单次播放,单曲循环,列表播放,列表循环,随机播放" data-value="1"
+                        <button type="button" id="playMode" data-play="单次播放,单曲循环,列表播放,列表循环,随机播放" data-value="1"
                                 class="btn btn-default">单次播放
                         </button>
-                        <button data-loading-text="播放" class="btn btn-info" id="jobPlay" type="button">播放</button>-->
+                        <!--<button data-loading-text="播放" class="btn btn-info" id="jobPlay" type="button">播放</button>-->
                         </span>
                     </div>
                 </div>
@@ -448,18 +440,6 @@
 <script src="./resources/app/login.js"></script>
 <script src="./resources/app/data.js"></script>
 <script src="./resources/app/speech.js"></script>
-<!--<script>
-    $(function () {
-        $("#playMode").click(function () {
-            var index = $(this).attr("data-value");
-            var arr = $(this).attr("data-play").split(",");
-            if (arr.length == +index) {
-                index = 0;
-            }
-            $(this).text(arr[+index]);
-            $(this).attr("data-value", ++index);
-        })
-    })
-</script>-->
+<script src="./resources/static/js/agreed.js"></script>
 </body>
 </html>
