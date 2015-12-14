@@ -195,6 +195,8 @@ function modifyCarListView(id) {
         show: true
     });
     $("#modifyCarListViewModal input[name=taskNumberId]:hidden").val(id);
+    var data = $("#23EB0B105D73C05CE0530F2016AC9654").attr("data-json");
+    $("#modifyCarListViewModal input[name=taskNumber]").val(JSON.parse(data).number);
 }
 
 function goTop(fid, id) {
