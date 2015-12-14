@@ -22,7 +22,7 @@ var play = function () {
             var rule = $("#playModal input[name=rulePlay]").val();
             var rulePlay = utils.rulePlay.rulePlayStr(json, rule);
             var aheadTime = $("#playModal input[name=aheadTime]").val();
-            var data = {speech: rulePlay, id: id, time: json.time, aheadTime: aheadTime, taskNumber: +number};
+            var data = {speech: rulePlay, time: json.time, aheadTime: aheadTime, taskNumber: +number};
 
             $("#" + id).attr("class", "success text-center");
             $("#" + id).find("button:contains('立即播放')").button("loading");

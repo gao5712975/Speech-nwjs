@@ -7,18 +7,33 @@ var http = require("http");
 var querystring = require("querystring");
 var schedule = require("node-schedule");
 var logger = require('./logger').getLogger('play.js');
-var utils = require('./utils');
-var TTS = require('./libokvtts');
-
+var urlStr = "http://127.0.0.1:3001/Speech/admin/";
 /**
  *
  * @param dataStr {speech: rulePlay, taskNumber: number, id: id}
  * @param callback 返回状态码
  */
 var speechPlay = function (dataStr, callback) {
-    TTS.OKVPlay(dataStr.speech, dataStr.taskNumber,function (res) {
-        callback(res);
-    })
+    var optUrl = url.parse(urlStr + "play.do");
+    optUrl.method = "post";
+    optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+    var postData = "";
+    var manage = http.request(optUrl, function (ma) {
+        ma.on("data", function (data) {
+            postData += data;
+        }).on("end", function () {
+            callback(JSON.parse(postData));
+        }).on("error", function (e) {
+            logger.error("speechPlay" + e.message);
+            callback({status: 2});
+        });
+    });
+    manage.on('error', function (e) {
+        logger.error("speechPlay" + e.message);
+        callback({status: 2});
+    });
+    manage.write(querystring.stringify(dataStr));
+    manage.end();
 };
 
 /**
@@ -28,6 +43,10 @@ var speechPlay = function (dataStr, callback) {
  * @statusPlay 0 :手动停止后或者没有开始播报  1:开始播报或者等待
  */
 var play = function (dataStr, callback) {
+    var optUrl = url.parse(urlStr + "play.do");
+    optUrl.method = "post";
+    optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+
     /*按提前时间播报班车信息*/
     var time = dataStr.time;
     var aheadTime = dataStr.aheadTime;
@@ -43,51 +62,87 @@ var play = function (dataStr, callback) {
     var date = new Date(year, month, d, h, m, 0);//将车次时间转换为标准时间
 
     if (new Date().getTime() >= (new Date(date.getTime() - parseInt(aheadTime) * 60 * 1000))) {
-        TTS.OKVPlay(dataStr.speech, dataStr.taskNumber, function (res) {
-            callback(res);
-        })
+        var manage = http.request(optUrl, function (ma) {
+            var postData = "";
+            ma.on("data", function (data) {
+                postData += data;
+            }).on("end", function () {
+                callback(JSON.parse(postData));
+            }).on("error", function (e) {
+                logger.error("play" + e.message);
+                callback({status: 2});
+            });
+        });
+        manage.on('error', function (e) {
+            logger.error("play" + e.message);
+            callback({status: 2});
+        });
+        delete dataStr.aheadTime;
+        delete dataStr.time;
+        manage.write(querystring.stringify(dataStr));
+        manage.end();
     } else {
-        global.timeout = schedule.scheduleJob(new Date(new Date().getTime() + 5000), function () {
+        global.timeout = schedule.scheduleJob(new Date(new Date().getTime() + 10000), function () {
             callback({status: 3});
         });
     }
-
 };
 
+/**
+ *
+ * @param callback 返回状态码 定时任务对象
+ */
 var stop = function (callback) {
-    TTS.OKVStop(function (res) {
-        if (global.timeout) {
-            global.timeout.cancel();
-        }
-        callback(res);
-    })
-};
-
-var volumeConfig = function (data, callback) {
-    TTS.OKVSetVolume(data, function (res) {
-        callback(res);
+    var optUrl = url.parse(urlStr + "stop.do");
+    optUrl.method = "post";
+    optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+    var postData = "";
+    var manage = http.request(optUrl, function (ma) {
+        ma.on("data", function (data) {
+            postData += data;
+        }).on("end", function () {
+            if (global.timeout) {
+                global.timeout.cancel();
+            }
+            callback(JSON.parse(postData));
+        }).on("error", function (e) {
+            callback({status: 2});
+            logger.error(e.message);
+        });
     });
+    manage.on('error', function (e) {
+        logger.error("stop" + e.message);
+        callback({status: 2});
+    });
+    manage.end();
 };
 
 var speechConfig = function (data, callback) {
-    TTS.OKVSetSpeed(data, function (res) {
-        callback(res);
+    var optUrl = url.parse(urlStr + "speechConfig.do");
+    optUrl.headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+    optUrl.method = "post";
+    var postData = "";
+    var manage = http.request(optUrl, function (ma) {
+        ma.on("data", function (data) {
+            postData += data;
+        }).on("end", function () {
+            callback(JSON.parse(postData));
+        }).on("error", function (e) {
+            logger.error(e.message);
+            callback({status: 2});
+        });
     });
-};
-
-var timbreConfig = function (data, callback) {
-    TTS.OKVSetLangMode(data, function (res) {
-        callback(res);
+    manage.on('error', function (e) {
+        logger.error(e.message);
+        callback({status: 2});
     });
+    manage.write(querystring.stringify(data));
+    manage.end();
 };
 
 module.exports = {
     speechPlay: speechPlay,
     play: play,
     stop: stop,
-    volumeConfig: volumeConfig,
-    speechConfig: speechConfig,
-    timbreConfig: timbreConfig
+    speechConfig: speechConfig
 };
-
-
