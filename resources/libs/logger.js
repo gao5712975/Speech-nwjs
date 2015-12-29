@@ -29,8 +29,8 @@ log4js.configure({
     replaceConsole: true
 });
 
-//log4js.setGlobalLogLevel(log4js.levels.ERROR);
-log4js.setGlobalLogLevel(log4js.levels.DEBUG);
+log4js.setGlobalLogLevel(log4js.levels.ERROR);
+//log4js.setGlobalLogLevel(log4js.levels.DEBUG);
 
 function setLogLevel(level){
     log4js.setGlobalLogLevel(level || log4js.levels.DEBUG);

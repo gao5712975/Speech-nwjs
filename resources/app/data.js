@@ -31,7 +31,7 @@ var getDate = function () {
                 postData += data;
             }).on("end", function () {
                 var json = JSON.parse(postData);
-                if (json.status == "01") {
+                if (json.status == 0) {
                     global.carData = json.result;
 
                     clearInterval(time);
@@ -48,7 +48,7 @@ var getDate = function () {
                     }, 1000);
 
                     utils.viewTable();
-                } else if (json.status == "00") {
+                } else if (json.status == 1) {
                     utils.alertModal("请登录");//没有登录
                 } else {
                     utils.alertModal("系统错误");//系统错误
@@ -195,7 +195,7 @@ function modifyCarListView(id) {
         show: true
     });
     $("#modifyCarListViewModal input[name=taskNumberId]:hidden").val(id);
-    var data = $("#23EB0B105D73C05CE0530F2016AC9654").attr("data-json");
+    var data = $("#"+id).attr("data-json");
     $("#modifyCarListViewModal input[name=taskNumber]").val(JSON.parse(data).number);
 }
 

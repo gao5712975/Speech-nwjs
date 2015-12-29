@@ -3,6 +3,7 @@
  */
 'use strict';
 var ffi = require('ffi');
+var ref = require('ref');
 var path = require('path');
 var nwPath = process.execPath;
 var nwDir = path.dirname(nwPath);
@@ -21,12 +22,20 @@ var libokvtts = ffi.Library(nwDir + '\\libokvtts.dll', {
     'OKVStop': ['int', []],
     'OKVUnInit': ['int', ['void']]
 });
-var init = libokvtts.OKVInit(nwDir);
+/*var init = libokvtts.OKVInit(nwDir);
 if (init == 0) {
     console.info("初始化成功!!!");
 } else {
     console.info("初始化失败/(ㄒoㄒ)/~~");
-}
+}*/
+
+var wininet = ffi.Library('Wininet.dll', {
+    'InternetGetConnectedState': ['bool', [ref.refType('int'), 'int']]
+});
+
+var intPtr = ref.alloc('int');
+console.info(wininet.InternetGetConnectedState(intPtr, 0));
+
 
 var status = 0;// 0：播报完成且不是中途中断。1：不管是否播报，都认为是被中断播报。2：系统错误，动态库加载失败。3：手动停止后的状态。
 

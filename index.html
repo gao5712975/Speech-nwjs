@@ -38,6 +38,7 @@
                         <li><a data-toggle="modal" data-target="#soundModal" href="#">语音设置</a></li>
                         <li><a data-toggle="modal" data-target="#playModal" href="#">播放设置</a></li>
                         <li><a data-toggle="modal" data-target="#configureModal" href="#">常规设置</a></li>
+                        <li><a data-toggle="modal" data-target="#dataSourceModal" href="#">数据源设置</a></li>
                         <li role="separator" class="divider"></li>
                         <li><a data-toggle="modal" data-target="#getDataModal" href="#">数据更新</a></li>
                         <li role="separator" class="divider"></li>
@@ -122,7 +123,7 @@
                         <button type="button" id="playMode" data-play="单次播放,单曲循环,列表播放,列表循环,随机播放" data-value="1"
                                 class="btn btn-default">单次播放
                         </button>
-                        <!--<button data-loading-text="播放" class="btn btn-info" id="jobPlay" type="button">播放</button>-->
+                            <!--<button data-loading-text="播放" class="btn btn-info" id="jobPlay" type="button">播放</button>-->
                         </span>
                     </div>
                 </div>
@@ -232,7 +233,7 @@
         </div>
     </div>
 </div>
-
+<!--播放设置-->
 <div class="modal fade" id="playModal" tabindex="-1" role="dialog" aria-labelledby="playModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -261,7 +262,8 @@
                         <input type="text" class="form-control" name="rulePlay" id="exampleInputRulePlay"
                                placeholder="rulePlay">
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" data-container="body" data-toggle="popover"
+                            <button class="btn btn-default" id="buttonPopover" type="button" data-container="body"
+                                    data-toggle="popover"
                                     data-placement="right"
                                     data-content="
                                     <p>尊敬的旅客，去往终点站、${terminus}、班次为${carNumber}号的汽车、将在${time}准时发车，请旅客们提前去往${platformNo}站台，谢谢！</p>
@@ -294,7 +296,7 @@
         </div>
     </div>
 </div>
-
+<!--请求模态框-->
 <div class="modal fade" id="configureModal" tabindex="-1" role="dialog" aria-labelledby="configureModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -306,11 +308,24 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="exampleInputLoginUrl">登录地址</label>
-                    <input type="text" class="form-control" name="loginUrl" id="exampleInputLoginUrl"
-                           placeholder="loginUrl">
+
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                        <input type="checkbox" id="loginUrlCheckbox" class="controlDisabledBox" aria-label="loginUrlCheckbox">
+                    </span>
+                        <input type="text" class="form-control" name="loginUrl" id="exampleInputLoginUrl"
+                               placeholder="loginUrl" disabled>
+                    </div>
                     <label for="exampleInputDataUrl">请求地址</label>
-                    <input type="text" class="form-control" name="dataUrl" id="exampleInputDataUrl"
-                           placeholder="dataUrl">
+
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                        <input type="checkbox" id="dataUrlCheckbox" class="controlDisabledBox" aria-label="dataUrlCheckbox">
+                    </span>
+                        <input type="text" class="form-control" name="dataUrl" id="exampleInputDataUrl"
+                               placeholder="dataUrl" disabled>
+                    </div>
+
                 </div>
             </div>
             <div class="modal-footer">
@@ -431,6 +446,64 @@
 
             <div class="modal-footer">
                 <button type="button" id="saveCarList" class="btn btn-primary" data-dismiss="modal">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--数据源模态框-->
+<div class="modal fade" id="dataSourceModal" tabindex="-1" role="dialog" aria-labelledby="dataSourceModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="dataSourceModalLabel">数据源设置</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="exampleInputUserSource">用户名</label>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <input type="checkbox" id="userSourceCheckbox" class="controlDisabledBox" aria-label="userSourceCheckbox">
+                        </span>
+                        <input type="text" class="form-control" name="userSource" id="exampleInputUserSource"
+                               placeholder="userSource" disabled>
+                    </div>
+                    <label for="exampleInputPasswordSource">密码</label>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <input type="checkbox" id="passwordSourceCheckbox" class="controlDisabledBox" aria-label="passwordSourceCheckbox">
+                        </span>
+                        <input type="password" class="form-control" name="passwordSource" id="exampleInputPasswordSource"
+                               placeholder="passwordSource" disabled>
+                    </div>
+                    <label for="exampleInputAddressSource">IP</label>
+
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <input type="checkbox" id="addressSourceCheckbox" class="controlDisabledBox" aria-label="addressSourceCheckbox">
+                        </span>
+                        <input type="text" class="form-control" name="addressSource" id="exampleInputAddressSource"
+                               placeholder="addressSource" disabled>
+                    </div>
+                    <label for="exampleInputDatabaseSource">数据库</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <input type="checkbox" id="databaseSourceCheckbox" class="controlDisabledBox" aria-label="databaseSourceCheckbox">
+                        </span>
+                        <input type="text" class="form-control" name="databaseSource" id="exampleInputDatabaseSource"
+                               placeholder="databaseSource" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="saveDataSourceModal" class="btn btn-primary">提交</button>
+                <button type="button" id="restartServers" class="btn btn-info">重启服务</button>
+                <span style="width: 70px;display: inline-block;color: red;padding: 0 1em;font-size: 17px"></span>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>

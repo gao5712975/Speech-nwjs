@@ -31,10 +31,15 @@ var login = function () {
             ma.on("data", function (data) {
                 postData += data;
             }).on("end", function () {
-                postData = JSON.parse(postData);
-                if (postData.status == "00") {
+                console.info(postData);
+                try {
+                    postData = JSON.parse(postData);
+                }catch (e){
+                    console.info(e)
+                }
+                if (postData.status == 1) {
                     utils.alertModal("用户或密码错误");
-                } else if (postData.status == "01") {
+                } else if (postData.status == 0) {
                     global.company_id = postData.id;
                     var lo = {};
                     try {
@@ -70,11 +75,6 @@ var login = function () {
         manage.on('error', function (e) {
             logger.error("login"+e.message);
             utils.alertModal("服务连接失败");
-            fs.readFile(nwDir + "/data.ini","utf8", function (err,data) {
-                var d = JSON.parse(data);
-                global.carData = d;
-                utils.viewTable();
-            })
         });
         manage.write(querystring.stringify(data));
         manage.end();

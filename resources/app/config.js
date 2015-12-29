@@ -8,6 +8,7 @@ var nwDir = path.dirname(nwPath);
 var logger = require('./resources/libs/logger').getLogger('config.js');
 var utils = require('./resources/libs/utils');
 var SDK = require('./resources/libs/play');
+var child_process = require('./resources/libs/process');
 
 var config = {
     $speed: $("#soundModal input[name=speed]"),
@@ -20,7 +21,11 @@ var config = {
     $user: $("#loginModal input[name=user]"),
     $password: $("#loginModal input[name=password]"),
     $dataUrl: $("#configureModal input[name=dataUrl]"),
-    $loginUrl: $("#configureModal input[name=loginUrl]")
+    $loginUrl: $("#configureModal input[name=loginUrl]"),
+    $userSource: $("#dataSourceModal input[name=userSource]"),
+    $passwordSource: $("#dataSourceModal input[name=passwordSource]"),
+    $addressSource: $("#dataSourceModal input[name=addressSource]"),
+    $databaseSource: $("#dataSourceModal input[name=databaseSource]")
 };
 
 var viewConfig = function () {
@@ -44,15 +49,21 @@ var viewConfig = function () {
             var c = {};
             c.scope = "local";
             c.sound = {};
-            c.sound.speed = "";c.sound.volume = "";c.sound.timbre = "";
+            c.sound.speed = "";
+            c.sound.volume = "";
+            c.sound.timbre = "";
             c.play = {};
-            c.play.taskNumber = "";c.play.aheadTime = "";c.play.rulePlay = "";
+            c.play.taskNumber = "";
+            c.play.aheadTime = "";
+            c.play.rulePlay = "";
             c.updateData = {};
             c.updateData.updateTime = "";
             c.login = {};
-            c.login.user = "";c.login.password = "";
+            c.login.user = "";
+            c.login.password = "";
             c.urlConfig = {};
-            c.urlConfig.dataUrl = "";c.urlConfig.loginUrl = "";
+            c.urlConfig.dataUrl = "";
+            c.urlConfig.loginUrl = "";
             fs.writeFile(nwDir + '/config.ini', ini.stringify(c), function (err) {
                 if (err) throw err;
             });
@@ -61,28 +72,17 @@ var viewConfig = function () {
 };
 
 var saveSoundConfig = function () {
-    $("#saveSoundConfig").click(function () {
+    $("#saveSoundConfig").click(function (e) {
+        e.preventDefault();
         var speed = config.$speed.val();
         var volume = config.$volume.val();
         var timbre = config.$timbre.val();
+        SDK.speechConfig({speed:speed,volume:volume,timbre:timbre}, function (data) {
+            logger.info(data);
+        });
         var s = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (s.sound == undefined) {
             s.sound = {};
-        }
-        if (s.sound.speed != speed) {
-            SDK.speechConfig(s.sound.speed, function (data) {
-                logger.info(data);
-            });
-        }
-        if (s.sound.volume != volume) {
-            SDK.volumeConfig(s.sound.volume, function (data) {
-                logger.info(data);
-            });
-        }
-        if (s.sound.timbre != timbre) {
-            SDK.timbreConfig(s.sound.timbre, function (data) {
-                logger.info(data);
-            });
         }
         s.sound.speed = speed;
         s.sound.volume = volume;
@@ -92,7 +92,8 @@ var saveSoundConfig = function () {
 };
 
 var savePlayConfig = function () {
-    $("#savePlayConfig").click(function () {
+    $("#savePlayConfig").click(function (e) {
+        e.preventDefault();
         var taskNumber = config.$taskNumber.val();
         var aheadTime = config.$aheadTime.val();
         var rulePlay = config.$rulePlay.val();
@@ -114,7 +115,8 @@ var savePlayConfig = function () {
 };
 
 var saveGetDataConfig = function () {
-    $("#saveGetDataConfig").click(function () {
+    $("#saveGetDataConfig").click(function (e) {
+        e.preventDefault();
         var updateTime = config.$updateTime.val();
         var d = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
         if (d.updateData == undefined) {
@@ -127,7 +129,8 @@ var saveGetDataConfig = function () {
 
 
 var saveConfigureConfig = function () {
-    $("#saveConfigureConfig").click(function () {
+    $("#saveConfigureConfig").click(function (e) {
+        e.preventDefault();
         var dataUrl = config.$dataUrl.val();
         var loginUrl = config.$loginUrl.val();
         var l = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
@@ -147,13 +150,50 @@ var saveConfigureConfig = function () {
     });
 };
 
+var saveDatabaseConfig = function () {
+    $("#saveDataSourceModal").click(function (e) {
+        e.preventDefault();
+        var userSource = $("#dataSourceModal input[name=userSource]").val();
+        var passwordSource = $("#dataSourceModal input[name=passwordSource]").val();
+        var addressSource = $("#dataSourceModal input[name=addressSource]").val();
+        var databaseSource = $("#dataSourceModal input[name=databaseSource]").val();
+        var data = utils.properties.proRead(nwDir + "/system/tomcat/webapps/Speech/WEB-INF/classes/JDBC.properties");
+        data.jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=tcp)(port=1521)(host="+ addressSource +"))(connect_data=(service_name="+ databaseSource +")))";
+        data.user = userSource;
+        data.password = passwordSource;
+        utils.properties.proWrite(nwDir + "/system/tomcat/webapps/Speech/WEB-INF/classes/JDBC.properties",data);
+    })
+};
+
+var restartServers = function () {
+    $("#restartServers").click(function (e) {
+        e.preventDefault();
+        console.error("net stop Tomcat6");
+        try {
+            child_process.execFun("net stop Tomcat6");
+            child_process.execFun("net start Tomcat6");
+            child_process.execFun("sc config Tomcat6 start= auto");
+        }catch (e){
+            console.error("Tomcat6 "+e);
+            child_process.execFun("net start Tomcat6");
+            child_process.execFun("sc config Tomcat6 start= auto");
+        }
+        console.error("net start Tomcat6");
+        $(this).next().text("成功");
+    })
+};
+
 var init = function () {
     viewConfig();
     saveSoundConfig();
     savePlayConfig();
     saveGetDataConfig();
     saveConfigureConfig();
+    saveDatabaseConfig();
+    restartServers();
 };
 
 init();
+
+
 

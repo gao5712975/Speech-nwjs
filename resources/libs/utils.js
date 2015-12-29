@@ -2,7 +2,7 @@
  * Created by Yuan on 2015/11/17.
  */
 'use strict';
-
+var fs = require('fs');
 var $ = global.$;
 
 var alertModal = function (text) {
@@ -123,8 +123,8 @@ var viewTableFun = {
     },
     viewSpeechStr: function (data) {
         var con = data.content;
-        if(data.content.length > 50){
-            con = data.content.substring(0,50)+"...";
+        if (data.content.length > 50) {
+            con = data.content.substring(0, 50) + "...";
         }
         var index = parseInt($("#speechList >tr").length) + 1;
         var select = "<div class='btn-group'><button type='button' data-loading-text='播放' class='btn btn-success' onclick=\"singlePlay(\'" + data.id + "\')\">播放</button> <button type='button' class='btn btn-info'onclick=\"modifySpeech(\'" + data.id + "\')\">修改</button> <button type='button' class='btn btn-warning'onclick=\"deleteSpeech(\'" + data.id + "\')\">删除</button></div>";
@@ -169,9 +169,43 @@ var viewTable = function () {
     viewTableFun.viewHistory(oldArray);
 };
 
+/*读取properties文件 不带注释*/
+var properties = {
+    proRead: function (uri, encoding) {
+        var encoding = encoding == null ? 'UTF-8' : encoding;  //定义编码类型
+        try {
+            var content = fs.readFileSync(uri, encoding);
+            var regexjing = /\s*(#+)/;  //去除注释行的正则
+            var regexkong = /\s*=\s*/;  //去除=号前后的空格的正则
+            var keyvalue = {};  //存储键值对
+            var arr_case = null;
+            var regexline = /.+/g;  //匹配换行符以外的所有字符的正则
+            while (arr_case = regexline.exec(content)) {  //过滤掉空行
+                if (!regexjing.test(arr_case)) {  //去除注释行
+                    keyvalue[arr_case.toString().split(regexkong)[0]] = arr_case.toString().split(regexkong)[1];  //存储键值对
+                    console.log(arr_case.toString());
+                }
+            }
+        } catch (e) {
+            e.message  //这里根据自己的需求返回
+        }
+        return keyvalue;
+    },
+    proWrite: function (uri, data) {
+        var str = "";
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                str += key + "=" + data[key] + "\r\n"
+            }
+        }
+        fs.writeFileSync(uri, str, {start: 0, flags: "w", encoding: "utf8"});
+    }
+};
+
 module.exports = {
     alertModal: alertModal,
     rulePlay: rulePlay,
     viewTableFun: viewTableFun,
-    viewTable: viewTable
+    viewTable: viewTable,
+    properties:properties
 };
