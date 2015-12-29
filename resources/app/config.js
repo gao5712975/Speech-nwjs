@@ -77,7 +77,7 @@ var saveSoundConfig = function () {
         var speed = config.$speed.val();
         var volume = config.$volume.val();
         var timbre = config.$timbre.val();
-        SDK.speechConfig({speed:speed,volume:volume,timbre:timbre}, function (data) {
+        SDK.speechConfig({speed: speed, volume: volume, timbre: timbre}, function (data) {
             logger.info(data);
         });
         var s = ini.parse(fs.readFileSync(nwDir + "/config.ini", "utf8"));
@@ -149,7 +149,15 @@ var saveConfigureConfig = function () {
 
     });
 };
-
+var viewDatabaseConfig = function () {
+    var data = utils.properties.proRead(nwDir + "/system/tomcat/webapps/Speech/WEB-INF/classes/JDBC.properties");
+    if (data != null) {
+        $("#dataSourceModal input[name=userSource]").val(data.user);
+        $("#dataSourceModal input[name=passwordSource]").val(data.password);
+        $("#dataSourceModal input[name=addressSource]").val(data.addressSource);
+        $("#dataSourceModal input[name=databaseSource]").val(data.databaseSource)
+    }
+};
 var saveDatabaseConfig = function () {
     $("#saveDataSourceModal").click(function (e) {
         e.preventDefault();
@@ -158,10 +166,12 @@ var saveDatabaseConfig = function () {
         var addressSource = $("#dataSourceModal input[name=addressSource]").val();
         var databaseSource = $("#dataSourceModal input[name=databaseSource]").val();
         var data = utils.properties.proRead(nwDir + "/system/tomcat/webapps/Speech/WEB-INF/classes/JDBC.properties");
-        data.jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=tcp)(port=1521)(host="+ addressSource +"))(connect_data=(service_name="+ databaseSource +")))";
+        data.addressSource = addressSource;
+        data.databaseSource = databaseSource;
+        data.jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=tcp)(port=1521)(host=" + addressSource + "))(connect_data=(service_name=" + databaseSource + ")))";
         data.user = userSource;
         data.password = passwordSource;
-        utils.properties.proWrite(nwDir + "/system/tomcat/webapps/Speech/WEB-INF/classes/JDBC.properties",data);
+        utils.properties.proWrite(nwDir + "/system/tomcat/webapps/Speech/WEB-INF/classes/JDBC.properties", data);
     })
 };
 
@@ -173,13 +183,18 @@ var restartServers = function () {
             child_process.execFun("net stop Tomcat6");
             child_process.execFun("net start Tomcat6");
             child_process.execFun("sc config Tomcat6 start= auto");
-        }catch (e){
-            console.error("Tomcat6 "+e);
-            child_process.execFun("net start Tomcat6");
-            child_process.execFun("sc config Tomcat6 start= auto");
+            $(this).next().text("成功");
+        } catch (e) {
+            console.error("Tomcat6 " + e);
+            try {
+                child_process.execFun("net start Tomcat6");
+                child_process.execFun("sc config Tomcat6 start= auto");
+                $(this).next().text("成功");
+            } catch (e) {
+                console.error("Tomcat6 " + e);
+                $(this).next().text("失败");
+            }
         }
-        console.error("net start Tomcat6");
-        $(this).next().text("成功");
     })
 };
 
@@ -191,6 +206,7 @@ var init = function () {
     saveConfigureConfig();
     saveDatabaseConfig();
     restartServers();
+    viewDatabaseConfig();
 };
 
 init();
